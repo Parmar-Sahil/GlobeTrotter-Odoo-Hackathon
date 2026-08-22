@@ -1,12 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { DestinationCard } from "@/components/dashboard/DestinationCard";
 import { DestinationCardSkeleton } from "@/components/ui/Skeleton";
 import { useSearchDestinations } from "@/hooks/use-destinations";
 import { useSearchActivities } from "@/hooks/use-activities";
 import { useMyTrips, useTripMutations } from "@/hooks/use-trips";
+import { communityService } from "@/lib/services/community.service";
 import { Destination, Activity, ActivityCategory } from "@/types";
 import { formatCurrency } from "@/lib/utils";
 import {
@@ -114,41 +116,12 @@ export default function ExplorePage() {
 
   const activities = actData?.activities || [];
 
-  const communityTrips = [
-    {
-      id: "comm-1",
-      title: "Autumn Across Western Europe",
-      creator: "@wanderer_aarav",
-      duration: "10 Days",
-      stops: "Paris → Lyon → Zurich → Milan",
-      estimatedCost: "₹94,000",
-      coverImage:
-        "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=1000&auto=format&fit=crop&q=80",
-      likes: 142,
-    },
-    {
-      id: "comm-2",
-      title: "Royal Forts & Sunsets Across Rajasthan",
-      creator: "@diya_travels",
-      duration: "6 Days",
-      stops: "Jaipur → Jodhpur → Udaipur",
-      estimatedCost: "₹38,000",
-      coverImage:
-        "https://images.unsplash.com/photo-1599661046289-e31897846e41?w=1000&auto=format&fit=crop&q=80",
-      likes: 98,
-    },
-    {
-      id: "comm-3",
-      title: "Zen Sanctuaries & Coastal Tea Trails",
-      creator: "@kenji_explorer",
-      duration: "8 Days",
-      stops: "Tokyo → Hakone → Kyoto → Osaka",
-      estimatedCost: "₹1,25,000",
-      coverImage:
-        "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=1000&auto=format&fit=crop&q=80",
-      likes: 215,
-    },
-  ];
+  const { data: postsData } = useQuery({
+    queryKey: ["community", "posts"],
+    queryFn: () => communityService.getPosts(),
+  });
+
+  const communityPostsList = postsData?.posts || [];
 
   const handleConfirmAddToTrip = async () => {
     if (!selectedItemForTrip || !selectedTripId) return;
@@ -215,7 +188,7 @@ export default function ExplorePage() {
     }
   };
 
-  const handleCopyCommunityTrip = async (commTrip: (typeof communityTrips)[0]) => {
+  const handleCopyCommunityTrip = async (commTrip: { id: string; title: string; creator?: string; stops?: string; coverImage?: string }) => {
     setCopiedTripId(commTrip.id);
     try {
       await createTrip({
@@ -468,54 +441,62 @@ export default function ExplorePage() {
         {/* Tab 3: Discover Community Trips */}
         {activeTab === "discover" && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {communityTrips.map((comm) => (
-              <div
-                key={comm.id}
-                className="group rounded-3xl bg-white border border-orange-100 shadow-xs hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col justify-between"
-              >
-                <div className="relative h-48 w-full overflow-hidden bg-slate-950">
-                  <img
-                    src={comm.coverImage}
-                    alt={comm.title}
-                    className="w-full h-full object-cover group-hover:scale-106 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                  <span className="absolute top-3 left-3 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[10px] font-bold text-white">
-                    {comm.duration}
-                  </span>
-                </div>
+            {communityPostsList.map((post: any) => {
+              const image =
+                post.imageUrls && post.imageUrls.length > 0
+                  ? (typeof post.imageUrls === "string" ? JSON.parse(post.imageUrls)[0] : post.imageUrls[0])
+                  : "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800";
+              const author = post.user?.username || post.user?.firstName || "Traveler";
 
-                <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-                  <div className="space-y-1.5">
-                    <div className="text-[11px] text-slate-400 font-medium">
-                      Curated by <strong className="text-slate-700">{comm.creator}</strong>
-                    </div>
-                    <h3 className="text-base font-extrabold text-slate-900 group-hover:text-[#7C2D12] transition-colors">
-                      {comm.title}
-                    </h3>
-                    <p className="text-xs text-slate-500 font-semibold">
-                      {comm.stops}
-                    </p>
-                  </div>
-
-                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                    <span className="font-extrabold text-[#7C2D12]">
-                      {comm.estimatedCost}
+              return (
+                <div
+                  key={post.id}
+                  className="group rounded-3xl bg-white border border-orange-100 shadow-xs hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col justify-between"
+                >
+                  <div className="relative h-48 w-full overflow-hidden bg-slate-950">
+                    <img
+                      src={image}
+                      alt={post.title}
+                      className="w-full h-full object-cover group-hover:scale-106 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                    <span className="absolute top-3 left-3 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[10px] font-bold text-white">
+                      Community Review
                     </span>
+                  </div>
 
-                    <button
-                      type="button"
-                      disabled={copiedTripId === comm.id}
-                      onClick={() => handleCopyCommunityTrip(comm)}
-                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#7C2D12] hover:bg-[#9A3412] text-white text-xs font-bold transition-all shadow-2xs"
-                    >
-                      <Copy className="w-3.5 h-3.5" />
-                      {copiedTripId === comm.id ? "Copying..." : "Copy to Planner"}
-                    </button>
+                  <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                    <div className="space-y-1.5">
+                      <div className="text-[11px] text-slate-400 font-medium">
+                        Shared by <strong className="text-slate-700">@{author}</strong>
+                      </div>
+                      <h3 className="text-base font-extrabold text-slate-900 group-hover:text-[#7C2D12] transition-colors">
+                        {post.title}
+                      </h3>
+                      <p className="text-xs text-slate-500 font-normal line-clamp-2">
+                        {post.body}
+                      </p>
+                    </div>
+
+                    <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                      <span className="font-extrabold text-[#7C2D12]">
+                        ❤️ {post.likesCount || post._count?.likes || 0} Likes
+                      </span>
+
+                      <button
+                        type="button"
+                        disabled={copiedTripId === post.id}
+                        onClick={() => handleCopyCommunityTrip({ id: post.id, title: post.title, creator: author, stops: "Community Route", coverImage: image } as any)}
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#7C2D12] hover:bg-[#9A3412] text-white text-xs font-bold transition-all shadow-2xs"
+                      >
+                        <Copy className="w-3.5 h-3.5" />
+                        {copiedTripId === post.id ? "Copying..." : "Copy to Planner"}
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 

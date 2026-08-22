@@ -3,9 +3,10 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { LANDING_EXPERIENCES } from "@/lib/landingData";
+import { useSearchActivities } from "@/hooks/use-activities";
+import { formatCurrency } from "@/lib/utils";
 import { FadeIn } from "../animation/FadeIn";
 import {
-  Sparkles,
   Clock,
   MapPin,
   Plus,
@@ -16,6 +17,7 @@ import {
 
 export function ExperienceShowcase() {
   const [addedIds, setAddedIds] = useState<string[]>([]);
+  const { data: actData } = useSearchActivities({ limit: 4 });
 
   const handleToggleAdd = (id: string) => {
     if (addedIds.includes(id)) {
@@ -24,6 +26,19 @@ export function ExperienceShowcase() {
       setAddedIds([...addedIds, id]);
     }
   };
+
+  const displayExperiences =
+    actData?.activities && actData.activities.length > 0
+      ? actData.activities.map((a: any) => ({
+          id: a.id,
+          title: a.title || a.name,
+          category: (a.category || "activity").replace("_", " "),
+          estimatedCost: a.estimatedCost > 0 ? formatCurrency(a.estimatedCost) : "Free",
+          duration: `${a.durationMinutes || 120} mins`,
+          location: a.city?.name ? `${a.city.name}, ${a.city.country}` : "Global",
+          image: a.imageUrl || "https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?w=800",
+        }))
+      : LANDING_EXPERIENCES;
 
   return (
     <section id="experiences" className="py-20 lg:py-28 bg-[#FAF7F2] border-y border-orange-100">
@@ -54,11 +69,11 @@ export function ExperienceShowcase() {
 
         {/* Experience Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {LANDING_EXPERIENCES.map((exp, idx) => {
+          {displayExperiences.map((exp: any, idx: number) => {
             const isAdded = addedIds.includes(exp.id);
 
             return (
-              <FadeIn key={exp.id} delay={idx * 0.08} distance={20}>
+              <FadeIn key={exp.id || idx} delay={idx * 0.08} distance={20}>
                 <div className="group bg-white rounded-3xl border border-orange-100/90 shadow-xs hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col justify-between h-full">
                   {/* Image container */}
                   <div className="relative h-48 w-full overflow-hidden bg-slate-100">

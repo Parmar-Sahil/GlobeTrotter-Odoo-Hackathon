@@ -14,10 +14,19 @@ export interface DestinationSearchParams {
 
 export const destinationService = {
   async getTopRegional(): Promise<Destination[]> {
-    const res = await apiClient.get<ApiResponse<Destination[]>>(
+    const res = await apiClient.get<ApiResponse<any>>(
       "/destinations/top-regional"
     );
-    return res.data.data || [];
+    const rawData = res.data.data;
+    if (Array.isArray(rawData)) return rawData;
+    if (rawData && typeof rawData === "object") {
+      const flattened: Destination[] = [];
+      Object.values(rawData).forEach((list: any) => {
+        if (Array.isArray(list)) flattened.push(...list);
+      });
+      return flattened;
+    }
+    return [];
   },
 
   async search(params?: DestinationSearchParams): Promise<{ destinations: Destination[]; meta?: any }> {
