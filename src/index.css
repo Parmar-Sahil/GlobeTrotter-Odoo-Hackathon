@@ -26,6 +26,15 @@
   }
 }
 
+@layer utilities {
+  .shadow-brand {
+    box-shadow: 0 4px 14px 0 rgba(242, 84, 27, 0.25);
+  }
+  .shadow-brand-lg {
+    box-shadow: 0 10px 25px -3px rgba(242, 84, 27, 0.35);
+  }
+}
+
 /* Clean Airbnb-style Cards & Panels */
 .clean-card {
   @apply bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-sm transition-all duration-200;
@@ -42,7 +51,8 @@
 
 /* Brand Button styling (GlobTrottler Brand Orange #F2541B) */
 .btn-primary {
-  @apply bg-[#F2541B] hover:bg-[#d9440f] active:scale-95 text-white font-bold text-sm px-4 py-2.5 rounded-xl shadow-brand transition-all;
+  @apply bg-[#F2541B] hover:bg-[#d9440f] active:scale-95 text-white font-bold text-sm px-4 py-2.5 rounded-xl shadow-md transition-all;
+  box-shadow: 0 4px 14px 0 rgba(242, 84, 27, 0.25);
 }
 
 .btn-secondary {
