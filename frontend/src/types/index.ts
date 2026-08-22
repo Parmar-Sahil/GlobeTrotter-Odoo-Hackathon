@@ -105,15 +105,20 @@ export interface ItineraryItem {
 
 export interface ItinerarySection {
   id: string;
-  tripId: string;
+  tripId?: string;
   destinationId?: string | null;
   destination?: Destination | null;
+  city?: Destination | null;
   title: string;
   date?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
   arrivalDate?: string | null;
   departureDate?: string | null;
   order: number;
+  stopOrder?: number;
   items: ItineraryItem[];
+  itineraryItems?: ItineraryItem[];
 }
 
 // Trip

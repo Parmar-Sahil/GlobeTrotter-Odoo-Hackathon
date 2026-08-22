@@ -57,6 +57,40 @@ export interface UpdateItemDto extends Partial<AddItemDto> {
 
 export interface UpdateSectionDto extends Partial<AddSectionDto> {}
 
+function mapStopToSection(stop: any): ItinerarySection {
+  return {
+    id: stop.id,
+    tripId: stop.tripId,
+    title: stop.notes || stop.city?.name || stop.title || "Travel Stop",
+    destinationId: stop.cityId || stop.city?.id || stop.destinationId,
+    destination: stop.city || stop.destination,
+    city: stop.city || stop.destination,
+    startDate: stop.startDate,
+    endDate: stop.endDate,
+    arrivalDate: stop.startDate,
+    departureDate: stop.endDate,
+    order: stop.stopOrder ?? stop.order ?? 1,
+    stopOrder: stop.stopOrder ?? stop.order ?? 1,
+    items: (stop.itineraryItems || stop.items || []).map((item: any) => ({
+      id: item.id,
+      sectionId: stop.id,
+      stopId: stop.id,
+      title: item.title,
+      description: item.description,
+      category: item.category || item.itemType || "activity",
+      itemType: item.itemType || item.category || "activity",
+      startTime: item.startTime,
+      endTime: item.endTime,
+      durationMinutes: item.durationMinutes,
+      cost: item.costEstimate ?? item.cost ?? 0,
+      costEstimate: item.costEstimate ?? item.cost ?? 0,
+      order: item.orderIndex ?? item.order ?? 0,
+      orderIndex: item.orderIndex ?? item.order ?? 0,
+      activity: item.activity,
+    })),
+  };
+}
+
 export const tripService = {
   async getMyTrips(params?: {
     status?: string;
@@ -86,6 +120,8 @@ export const tripService = {
   async getTripById(id: string): Promise<Trip> {
     const res = await apiClient.get<ApiResponse<any>>(`/trips/${id}`);
     const t = res.data.data!;
+    const rawStops = t.stops || t.sections || [];
+    const sections: ItinerarySection[] = rawStops.map(mapStopToSection);
     return {
       ...t,
       title: t.name || t.title || "Untitled Trip",
@@ -94,7 +130,9 @@ export const tripService = {
       coverPhotoUrl: t.coverPhotoUrl || t.coverImage || null,
       budgetLimit: t.totalBudget || t.budgetLimit || 0,
       totalBudget: t.totalBudget || t.budgetLimit || 0,
-      destinationCount: t._count?.stops ?? t.stops?.length ?? 0,
+      destinationCount: rawStops.length,
+      sections,
+      stops: rawStops,
     };
   },
 
@@ -215,10 +253,14 @@ export const tripService = {
   },
 
   async getItinerary(tripId: string): Promise<{ sections: ItinerarySection[] }> {
-    const res = await apiClient.get<ApiResponse<{ sections: ItinerarySection[] }>>(
+    const res = await apiClient.get<ApiResponse<any>>(
       `/trips/${tripId}/itinerary`
     );
-    return res.data.data || { sections: [] };
+    const data = res.data.data;
+    if (!data) return { sections: [] };
+    const rawStops = data.stops || data.sections || [];
+    const sections: ItinerarySection[] = rawStops.map(mapStopToSection);
+    return { sections };
   },
 
   async getBudgetSummary(tripId: string): Promise<BudgetSummary> {

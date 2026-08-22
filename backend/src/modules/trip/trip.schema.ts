@@ -28,11 +28,18 @@ export const updateTripSchema = z.object({
 
 export const createSectionSchema = z.object({
   body: z.object({
-    title: z.string().min(1, 'Section title is required'),
+    title: z.string().min(1, 'Section title is required').optional(),
+    name: z.string().optional(),
+    cityId: z.string().optional(),
+    destinationId: z.string().optional(),
     description: z.string().optional(),
+    notes: z.string().optional(),
     sectionOrder: z.number().int().min(1).optional(),
+    stopOrder: z.number().int().min(1).optional(),
     startDate: z.string().optional(),
     endDate: z.string().optional(),
+    arrivalDate: z.string().optional(),
+    departureDate: z.string().optional(),
     allocatedBudget: z.number().min(0).optional(),
   }),
 });
