@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { TravelProvider, useTravel } from './context/TravelContext';
 import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
-import { AirbnbLandingPage } from './components/landing/AirbnbLandingPage';
+import { LandingPage } from './components/landing/LandingPage';
 import { HomeDashboardView } from './components/home/HomeDashboardView';
 import { DiscoverFeed } from './components/discover/DiscoverFeed';
 import { MyTripsView } from './components/trips/MyTripsView';
@@ -24,7 +24,7 @@ const AppContent: React.FC = () => {
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [isFloatingGlobiOpen, setIsFloatingGlobiOpen] = useState(false);
 
-  // If visitor is not authenticated, show the public Airbnb/MakeMyTrip landing page!
+  // If visitor is not authenticated, show the public Landing Page with Framer Motion, Lenis & interactive previews!
   if (!isAuthenticated) {
     return (
       <>
@@ -34,7 +34,7 @@ const AppContent: React.FC = () => {
             onComplete={() => setIsInitialLoading(false)}
           />
         )}
-        <AirbnbLandingPage />
+        <LandingPage />
       </>
     );
   }
