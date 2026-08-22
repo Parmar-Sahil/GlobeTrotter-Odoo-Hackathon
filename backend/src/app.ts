@@ -1,46 +1,54 @@
-import express, { Express } from "express";
-import cors from "cors";
-import helmet from "helmet";
-import morgan from "morgan";
-import config from "./config/env.js";
-import routes from "./routes/index.js";
-import { notFoundHandler } from "./middleware/not-found.middleware.js";
-import { errorHandler } from "./middleware/error.middleware.js";
+import express, { Request, Response } from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import morgan from 'morgan';
+import { env } from './config/env.config';
+import { errorHandler } from './middlewares/error.middleware';
+import { sendSuccess, sendError } from './utils/response.util';
 
-export const createApp = (): Express => {
-  const app = express();
+// Module Routers
+import authRouter from './modules/auth/auth.router';
+import userRouter from './modules/user/user.router';
+import destinationRouter from './modules/destination/destination.router';
+import activityRouter from './modules/activity/activity.router';
+import tripRouter from './modules/trip/trip.router';
+import communityRouter from './modules/community/community.router';
+import adminRouter from './modules/admin/admin.router';
 
-  // Security headers
-  app.use(helmet());
+const app = express();
 
-  // CORS configuration
-  app.use(
-    cors({
-      origin: config.clientUrl,
-      credentials: true,
-    })
-  );
+// Security and Logging Middlewares
+app.use(helmet());
+app.use(
+  cors({
+    origin: env.CLIENT_URL || '*',
+    credentials: true,
+  })
+);
+app.use(morgan(env.NODE_ENV === 'development' ? 'dev' : 'combined'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-  // Request logging
-  if (config.nodeEnv !== "test") {
-    app.use(morgan(config.nodeEnv === "production" ? "combined" : "dev"));
-  }
+// Health Check Endpoint
+app.get('/api/health', (req: Request, res: Response) => {
+  return sendSuccess(res, { timestamp: new Date().toISOString() }, 'GlobeTrotter API is running');
+});
 
-  // Body parsers
-  app.use(express.json());
-  app.use(express.urlencoded({ extended: true }));
+// API Routes
+app.use('/api/auth', authRouter);
+app.use('/api/users', userRouter);
+app.use('/api/destinations', destinationRouter);
+app.use('/api/activities', activityRouter);
+app.use('/api/trips', tripRouter);
+app.use('/api/community', communityRouter);
+app.use('/api/admin', adminRouter);
 
-  // API Routes
-  app.use("/api", routes);
+// 404 Route Handler
+app.use((req: Request, res: Response) => {
+  return sendError(res, `Route ${req.method} ${req.path} not found`, 404);
+});
 
-  // 404 Not Found Handler
-  app.use(notFoundHandler);
+// Global Error Handler
+app.use(errorHandler);
 
-  // Centralized Error Handler
-  app.use(errorHandler);
-
-  return app;
-};
-
-export const app = createApp();
 export default app;

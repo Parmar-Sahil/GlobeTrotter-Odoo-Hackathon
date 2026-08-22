@@ -35,6 +35,13 @@ lerna-debug.log*
 coverage/
 .nyc_output/
 
+# SQLite Database Files
+*.db
+*.db-journal
+dev.db
+backend/dev.db
+backend/prisma/dev.db
+
 # IDE and OS
 .DS_Store
 Thumbs.db
