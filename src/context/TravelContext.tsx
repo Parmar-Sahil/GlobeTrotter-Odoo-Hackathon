@@ -15,6 +15,7 @@ import { MOCK_USERS } from '../data/mockUsers';
 import { INITIAL_MOCK_TRIPS } from '../data/mockTrips';
 
 export type AppView = 
+  | 'landing'
   | 'home'
   | 'discover'
   | 'trips'
@@ -129,7 +130,7 @@ export const TravelProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [theme, setTheme] = useState<AppTheme>(() => {
     const saved = localStorage.getItem(LOCAL_STORAGE_KEY_THEME);
     if (saved === 'dark' || saved === 'light') return saved;
-    return 'light'; // Default clean Airbnb-like light mode
+    return 'light'; // Default clean light mode
   });
 
   const [currentUser, setCurrentUserState] = useState<User>(() => {
@@ -162,7 +163,7 @@ export const TravelProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     return INITIAL_NOTIFICATIONS;
   });
 
-  const [currentView, setCurrentViewState] = useState<AppView>('home');
+  const [currentView, setCurrentViewState] = useState<AppView>('landing');
   const [activeTripId, setActiveTripId] = useState<string | null>('trip-bali-01');
   const [globalSearchQuery, setGlobalSearchQuery] = useState<string>('');
   const [globiTip, setGlobiTip] = useState<GlobiSmartTip | null>({
@@ -257,7 +258,7 @@ export const TravelProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       particleCount: 100,
       spread: 70,
       origin: { y: 0.6 },
-      colors: ['#FF385C', '#0D9488', '#F59E0B', '#3B82F6', '#10B981']
+      colors: ['#F2541B', '#0D9488', '#F59E0B', '#3B82F6', '#10B981']
     });
   };
 
@@ -273,7 +274,7 @@ export const TravelProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       startDate: tripData.startDate || '2026-10-01',
       endDate: tripData.endDate || '2026-10-07',
       durationDays: tripData.durationDays || 7,
-      description: tripData.description || 'An exciting new travel adventure created with GlobeTrotter AI.',
+      description: tripData.description || 'An exciting new travel adventure created with GlobTrottler AI.',
       visibility: tripData.visibility || 'open_to_join',
       maxSpots: tripData.maxSpots || 4,
       hostId: currentUser.id,

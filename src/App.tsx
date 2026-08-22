@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { TravelProvider, useTravel } from './context/TravelContext';
 import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
+import { LandingPageView } from './components/landing/LandingPageView';
 import { HomeDashboardView } from './components/home/HomeDashboardView';
 import { DiscoverFeed } from './components/discover/DiscoverFeed';
 import { MyTripsView } from './components/trips/MyTripsView';
@@ -14,7 +15,6 @@ import { OnboardingModal } from './components/common/OnboardingModal';
 import { GlobiChatModal } from './components/mascot/GlobiChatModal';
 import { LoadingScreen } from './components/common/LoadingScreen';
 import { Sparkles } from 'lucide-react';
-import { BrandPlaneIcon } from './components/common/BrandLogo';
 
 const AppContent: React.FC = () => {
   const { currentView } = useTravel();
@@ -26,6 +26,14 @@ const AppContent: React.FC = () => {
 
   const renderCurrentView = () => {
     switch (currentView) {
+      case 'landing':
+        return (
+          <LandingPageView
+            onOpenCreateTrip={() => setIsCreateTripOpen(true)}
+            onOpenOnboarding={() => setIsOnboardingOpen(true)}
+            onTriggerLoading={() => setShowLoadingDemo(true)}
+          />
+        );
       case 'discover':
         return <DiscoverFeed onOpenCreateTrip={() => setIsCreateTripOpen(true)} />;
       case 'trips':
@@ -85,7 +93,7 @@ const AppContent: React.FC = () => {
       {/* Footer */}
       <Footer onOpenOnboarding={() => setIsOnboardingOpen(true)} />
 
-      {/* Floating Globi AI Mascot Widget (clean Airbnb-style pill) */}
+      {/* Floating Globi AI Mascot Widget */}
       <div className="fixed bottom-6 right-6 z-40">
         <button
           onClick={() => setIsFloatingGlobiOpen(true)}
