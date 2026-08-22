@@ -23,7 +23,7 @@ export function MobileNav() {
   ];
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-2 py-1.5 shadow-lg">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#FAF7F2]/95 backdrop-blur-md border-t border-orange-200/80 px-2 py-1.5 shadow-lg">
       <div className="flex items-center justify-around">
         {items.map((item) => {
           const Icon = item.icon;
@@ -38,10 +38,10 @@ export function MobileNav() {
                 href={item.href}
                 className="flex flex-col items-center -mt-5"
               >
-                <div className="p-3 bg-blue-600 rounded-full text-white shadow-lg shadow-blue-500/40 hover:bg-blue-700 active:scale-95 transition-transform">
+                <div className="p-3 bg-[#7C2D12] rounded-full text-white shadow-lg shadow-orange-950/30 hover:bg-[#9A3412] active:scale-95 transition-transform">
                   <Icon className="w-6 h-6" />
                 </div>
-                <span className="text-[10px] font-semibold text-blue-600 mt-1">
+                <span className="text-[10px] font-bold text-[#7C2D12] mt-1">
                   {item.name}
                 </span>
               </Link>
@@ -54,12 +54,16 @@ export function MobileNav() {
               href={item.href}
               className={`flex flex-col items-center py-1 px-3 rounded-xl transition-colors ${
                 isActive
-                  ? "text-blue-600 font-semibold"
+                  ? "text-[#7C2D12] font-bold"
                   : "text-slate-500 hover:text-slate-900"
               }`}
             >
-              <Icon className={`w-5 h-5 ${isActive ? "text-blue-600" : "text-slate-400"}`} />
-              <span className="text-[10px] mt-0.5">{item.name}</span>
+              <Icon
+                className={`w-5 h-5 ${
+                  isActive ? "text-[#7C2D12]" : "text-slate-400"
+                }`}
+              />
+              <span className="text-[10px] mt-0.5 font-medium">{item.name}</span>
             </Link>
           );
         })}
