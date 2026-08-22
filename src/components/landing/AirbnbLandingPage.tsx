@@ -4,8 +4,6 @@ import {
   MapPin,
   Calendar,
   Users,
-  DollarSign,
-  Sparkles,
   Heart,
   Star,
   Globe2,
@@ -13,48 +11,83 @@ import {
   Sun,
   Moon,
   ChevronRight,
+  ChevronLeft,
   ShieldCheck,
   Palmtree,
   Camera,
   Mountain,
   Utensils,
   Plane,
-  ArrowRight,
-  Bot,
-  CheckCircle2,
-  Vote,
-  Receipt,
-  UserPlus
+  Sparkles,
+  SlidersHorizontal,
+  X,
+  Check,
+  Building,
+  Flame,
+  User as UserIcon,
+  Compass,
+  ArrowRight
 } from 'lucide-react';
 import { useTravel } from '../../context/TravelContext';
-import { BrandLogo, BrandPlaneIcon } from '../common/BrandLogo';
+import { BrandPlaneIcon } from '../common/BrandLogo';
 import { AuthModal } from '../auth/AuthModal';
 import { GlobiChatModal } from '../mascot/GlobiChatModal';
-import { MOCK_DESTINATIONS } from '../../data/mockDestinations';
 import { Trip } from '../../types/travel';
+
+interface CategoryItem {
+  id: string;
+  label: string;
+  icon: string;
+}
+
+const AIRBNB_CATEGORIES: CategoryItem[] = [
+  { id: 'all', label: 'All Trips', icon: '✨' },
+  { id: 'beach', label: 'Beachfront', icon: '🏖️' },
+  { id: 'culture', label: 'Historical', icon: '🏛️' },
+  { id: 'mountain', label: 'Amazing views', icon: '🏔️' },
+  { id: 'tropical', label: 'Tropical', icon: '🌴' },
+  { id: 'foodie', label: 'Food & Wine', icon: '🍷' },
+  { id: 'pools', label: 'Amazing pools', icon: '🏊' },
+  { id: 'islands', label: 'Islands', icon: '🏝️' },
+  { id: 'castles', label: 'Castles', icon: '🏰' },
+  { id: 'camping', label: 'Camping', icon: '⛺' },
+  { id: 'luxe', label: 'Luxe', icon: '💎' },
+  { id: 'arctic', label: 'Arctic', icon: '❄️' },
+];
 
 export const AirbnbLandingPage: React.FC = () => {
   const { trips, theme, toggleTheme, login, availableUsers } = useTravel();
 
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isGlobiOpen, setIsGlobiOpen] = useState(false);
-  const [activeCategory, setActiveCategory] = useState('All');
-  const [destinationSearch, setDestinationSearch] = useState('');
-  const [selectedSpots, setSelectedSpots] = useState<number | 'all'>('all');
-  const [selectedBudget, setSelectedBudget] = useState<string>('all');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [activeTab, setActiveTab] = useState<'stays' | 'expeditions' | 'experiences'>('expeditions');
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const [likedTripIds, setLikedTripIds] = useState<Record<string, boolean>>({});
 
-  const categories = [
-    { label: 'All Trips', icon: <Globe2 className="w-4 h-4" /> },
-    { label: 'Tropical Beach', icon: <Palmtree className="w-4 h-4" /> },
-    { label: 'Heritage Culture', icon: <Camera className="w-4 h-4" /> },
-    { label: 'Alpine Mountain', icon: <Mountain className="w-4 h-4" /> },
-    { label: 'Food & Wine', icon: <Utensils className="w-4 h-4" /> },
-    { label: 'Luxury Villas', icon: <Sparkles className="w-4 h-4" /> },
+  // Search Bar States
+  const [activeSearchSection, setActiveSearchSection] = useState<'where' | 'when' | 'who' | null>(null);
+  const [destinationInput, setDestinationInput] = useState('');
+  const [travelersCount, setTravelersCount] = useState(1);
+  const [showTaxes, setShowTaxes] = useState(true);
+
+  // Quick destinations dropdown
+  const popularRegions = [
+    { title: "I'm flexible", icon: '🗺️', desc: 'Search worldwide' },
+    { title: 'Southeast Asia', icon: '🌴', desc: 'Bali, Thailand, Vietnam' },
+    { title: 'Europe', icon: '🏰', desc: 'Italy, Swiss Alps, France' },
+    { title: 'Japan', icon: '⛩️', desc: 'Kyoto, Tokyo, Mount Fuji' },
+    { title: 'India', icon: '🕌', desc: 'Jaipur, Kerala, Himalayas' },
   ];
 
+  const toggleLike = (e: React.MouseEvent, tripId: string) => {
+    e.stopPropagation();
+    setLikedTripIds(prev => ({ ...prev, [tripId]: !prev[tripId] }));
+  };
+
   const filteredTrips = trips.filter(trip => {
-    if (destinationSearch.trim()) {
-      const q = destinationSearch.toLowerCase();
+    if (destinationInput.trim()) {
+      const q = destinationInput.toLowerCase();
       const match =
         trip.title.toLowerCase().includes(q) ||
         trip.destination.toLowerCase().includes(q) ||
@@ -62,45 +95,89 @@ export const AirbnbLandingPage: React.FC = () => {
       if (!match) return false;
     }
 
-    if (activeCategory === 'Tropical Beach' && !trip.tags.includes('Beach') && !trip.destination.toLowerCase().includes('bali')) return false;
-    if (activeCategory === 'Heritage Culture' && !trip.tags.includes('Culture') && !trip.destination.toLowerCase().includes('kyoto') && !trip.destination.toLowerCase().includes('jaipur')) return false;
-    if (activeCategory === 'Alpine Mountain' && !trip.tags.includes('Adventure') && !trip.destination.toLowerCase().includes('swiss') && !trip.destination.toLowerCase().includes('iceland')) return false;
-    if (activeCategory === 'Food & Wine' && !trip.tags.includes('Food & Wine') && !trip.destination.toLowerCase().includes('amalfi')) return false;
-
-    if (selectedBudget === 'budget' && trip.totalBudget > 1200) return false;
-    if (selectedBudget === 'mid' && (trip.totalBudget < 1200 || trip.totalBudget > 2500)) return false;
-    if (selectedBudget === 'luxury' && trip.totalBudget <= 2500) return false;
+    if (selectedCategory === 'beach' && !trip.tags.includes('Beach') && !trip.destination.toLowerCase().includes('bali')) return false;
+    if (selectedCategory === 'culture' && !trip.tags.includes('Culture') && !trip.destination.toLowerCase().includes('kyoto') && !trip.destination.toLowerCase().includes('jaipur')) return false;
+    if (selectedCategory === 'mountain' && !trip.tags.includes('Adventure') && !trip.destination.toLowerCase().includes('swiss') && !trip.destination.toLowerCase().includes('iceland')) return false;
+    if (selectedCategory === 'foodie' && !trip.tags.includes('Food & Wine') && !trip.destination.toLowerCase().includes('amalfi')) return false;
 
     return true;
   });
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#0B0F17] text-slate-900 dark:text-slate-100 flex flex-col justify-between selection:bg-[#F2541B] selection:text-white transition-colors duration-200">
-      {/* 1. PUBLIC AIRBNB-STYLE NAVBAR */}
-      <header className="sticky top-0 z-40 w-full clean-nav transition-colors duration-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
-          {/* Brand Logo */}
-          <button
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="flex items-center gap-2 group text-left"
-          >
-            <BrandPlaneIcon className="w-10 h-10 shadow-brand" />
-            <div className="leading-tight">
-              <span className="font-display font-extrabold text-2xl tracking-tight text-slate-900 dark:text-white">
-                Glob<span className="text-[#F2541B]">Trottler</span>
+    <div className="min-h-screen bg-white dark:bg-[#0B0F17] text-slate-900 dark:text-slate-100 flex flex-col justify-between selection:bg-[#F2541B] selection:text-white font-sans">
+      {/* ========================================================================= */}
+      {/* 1. AIRBNB HEADER & TOP FLOATING NAVIGATION */}
+      {/* ========================================================================= */}
+      <header className="sticky top-0 z-40 bg-white/95 dark:bg-[#0B0F17]/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 transition-colors">
+        <div className="max-w-[1760px] mx-auto px-4 sm:px-8 lg:px-12 py-3.5 flex items-center justify-between gap-4">
+          {/* Logo on Left */}
+          <div className="flex-shrink-0">
+            <button
+              onClick={() => {
+                setSelectedCategory('all');
+                setDestinationInput('');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="flex items-center gap-2 group text-left"
+            >
+              <BrandPlaneIcon className="w-9 h-9 shadow-sm" />
+              <span className="font-display font-extrabold text-2xl tracking-tight text-[#F2541B]">
+                Glob<span className="text-slate-900 dark:text-white">Trottler</span>
               </span>
-              <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium hidden sm:block">
-                Social Travel & Expeditions
-              </p>
-            </div>
-          </button>
+            </button>
+          </div>
 
-          {/* Right Action Bar */}
-          <div className="flex items-center gap-3">
-            {/* Ask Globi AI Assistant */}
+          {/* Center Tabs: Stays | Expeditions | Experiences (Airbnb Style) */}
+          <div className="hidden md:flex items-center gap-6">
+            <button
+              onClick={() => setActiveTab('expeditions')}
+              className={`text-sm font-semibold transition-colors pb-1 relative ${
+                activeTab === 'expeditions'
+                  ? 'text-slate-900 dark:text-white font-bold'
+                  : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+              }`}
+            >
+              Expeditions & Squads
+              {activeTab === 'expeditions' && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-slate-900 dark:bg-white rounded-full" />
+              )}
+            </button>
+
+            <button
+              onClick={() => setActiveTab('stays')}
+              className={`text-sm font-semibold transition-colors pb-1 relative ${
+                activeTab === 'stays'
+                  ? 'text-slate-900 dark:text-white font-bold'
+                  : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+              }`}
+            >
+              Stays & Villas
+              {activeTab === 'stays' && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-slate-900 dark:bg-white rounded-full" />
+              )}
+            </button>
+
+            <button
+              onClick={() => setActiveTab('experiences')}
+              className={`text-sm font-semibold transition-colors pb-1 relative ${
+                activeTab === 'experiences'
+                  ? 'text-slate-900 dark:text-white font-bold'
+                  : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+              }`}
+            >
+              Experiences
+              {activeTab === 'experiences' && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-slate-900 dark:bg-white rounded-full" />
+              )}
+            </button>
+          </div>
+
+          {/* Right Action Menu: Host | Globi AI | Theme | User Capsule */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Ask Globi AI Assistant Pill */}
             <button
               onClick={() => setIsGlobiOpen(true)}
-              className="hidden sm:flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-900/60 text-[#F2541B] hover:bg-orange-100 dark:hover:bg-orange-900/40 transition-all text-xs font-bold shadow-sm"
+              className="hidden lg:flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-900/60 text-[#F2541B] hover:bg-orange-100 dark:hover:bg-orange-900/50 transition-all text-xs font-bold shadow-sm"
             >
               <div className="w-5 h-5 rounded-full overflow-hidden border border-orange-400/60 flex-shrink-0">
                 <img src="/assets/globi_idea.jpg" alt="Globi" className="w-full h-full object-cover" />
@@ -109,443 +186,497 @@ export const AirbnbLandingPage: React.FC = () => {
               <Sparkles className="w-3.5 h-3.5 text-[#F2541B] animate-pulse" />
             </button>
 
-            {/* Theme Switcher */}
+            {/* Become a Host Link */}
+            <button
+              onClick={() => setIsAuthOpen(true)}
+              className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 px-3.5 py-2.5 rounded-full transition-colors hidden sm:block"
+            >
+              GlobTrottler your trip
+            </button>
+
+            {/* Globe / Currency Indicator */}
             <button
               onClick={toggleTheme}
               title={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`}
-              className="p-2.5 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition-colors shadow-sm"
+              className="p-2.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 transition-colors"
             >
               {theme === 'light' ? (
-                <Moon className="w-4 h-4 text-slate-700" />
+                <Moon className="w-4 h-4" />
               ) : (
                 <Sun className="w-4 h-4 text-amber-400" />
               )}
             </button>
 
-            {/* Become a Host / Plan Trip */}
+            {/* Airbnb-style User Capsule Button */}
+            <div className="relative">
+              <button
+                onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                className="flex items-center gap-3 p-1.5 pl-3.5 rounded-full border border-slate-200 dark:border-slate-700 hover:shadow-md transition-all bg-white dark:bg-slate-800"
+              >
+                <Menu className="w-4 h-4 text-slate-600 dark:text-slate-300" />
+                <div className="w-7 h-7 rounded-full bg-slate-700 dark:bg-slate-600 text-white flex items-center justify-center text-xs font-bold overflow-hidden">
+                  <UserIcon className="w-4 h-4" />
+                </div>
+              </button>
+
+              {/* Airbnb User Dropdown Menu */}
+              {userDropdownOpen && (
+                <div
+                  onMouseLeave={() => setUserDropdownOpen(false)}
+                  className="absolute right-0 top-12 w-64 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl py-2 z-50 animate-fadeIn text-left text-xs"
+                >
+                  <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-800 space-y-1">
+                    <p className="font-bold text-slate-900 dark:text-white">Welcome to GlobTrottler</p>
+                    <p className="text-[11px] text-slate-400">Collaborative squad trips & AI companion</p>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      setUserDropdownOpen(false);
+                      setIsAuthOpen(true);
+                    }}
+                    className="w-full px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-800 font-bold text-slate-900 dark:text-white text-left transition-colors flex items-center justify-between"
+                  >
+                    <span>Sign up</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setUserDropdownOpen(false);
+                      setIsAuthOpen(true);
+                    }}
+                    className="w-full px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-left transition-colors"
+                  >
+                    Log in
+                  </button>
+
+                  <div className="my-1 border-t border-slate-100 dark:border-slate-800" />
+
+                  {/* 1-Click Demo Login for Judges */}
+                  <div className="px-4 py-1.5 text-[10px] font-extrabold uppercase text-[#F2541B] tracking-wider">
+                    ⚡ Instant Demo Personas
+                  </div>
+                  {availableUsers.slice(0, 3).map(u => (
+                    <button
+                      key={u.id}
+                      onClick={() => {
+                        setUserDropdownOpen(false);
+                        login(u);
+                      }}
+                      className="w-full px-4 py-2 hover:bg-orange-50/60 dark:hover:bg-slate-800 flex items-center gap-2 text-left transition-colors"
+                    >
+                      <img src={u.avatar} alt={u.name} className="w-5 h-5 rounded-full object-cover" />
+                      <div>
+                        <p className="font-bold text-slate-800 dark:text-slate-200 leading-none">{u.name}</p>
+                        <p className="text-[10px] text-slate-400">{u.roleTitle}</p>
+                      </div>
+                    </button>
+                  ))}
+
+                  <div className="my-1 border-t border-slate-100 dark:border-slate-800" />
+
+                  <button
+                    onClick={() => {
+                      setUserDropdownOpen(false);
+                      setIsGlobiOpen(true);
+                    }}
+                    className="w-full px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-left"
+                  >
+                    Ask Globi AI Companion
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* ========================================================================= */}
+        {/* 2. THE ICONIC AIRBNB BIG FLOATING SEARCH PILL */}
+        {/* ========================================================================= */}
+        <div className="max-w-4xl mx-auto px-4 pb-6 pt-2">
+          <div className="relative rounded-full bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-700 shadow-md hover:shadow-lg transition-all p-1.5 flex items-center justify-between divide-x divide-slate-200 dark:divide-slate-800">
+            {/* 1. WHERE */}
+            <div
+              onClick={() => setActiveSearchSection(activeSearchSection === 'where' ? null : 'where')}
+              className={`flex-1 px-6 py-2.5 rounded-full cursor-pointer transition-colors text-left relative ${
+                activeSearchSection === 'where' ? 'bg-slate-100 dark:bg-slate-800 shadow-inner' : 'hover:bg-slate-50 dark:hover:bg-slate-800/60'
+              }`}
+            >
+              <label className="text-[11px] font-extrabold text-slate-900 dark:text-white block tracking-tight">
+                Where
+              </label>
+              <input
+                type="text"
+                value={destinationInput}
+                onChange={e => setDestinationInput(e.target.value)}
+                placeholder="Search destinations"
+                className="w-full bg-transparent text-xs text-slate-600 dark:text-slate-300 font-medium placeholder-slate-400 focus:outline-none truncate"
+              />
+
+              {/* Where Popover Suggestions */}
+              {activeSearchSection === 'where' && (
+                <div
+                  onClick={e => e.stopPropagation()}
+                  className="absolute left-0 top-16 w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl p-4 z-50 animate-fadeIn"
+                >
+                  <p className="text-xs font-bold text-slate-900 dark:text-white mb-3">
+                    Search by region
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {popularRegions.map(reg => (
+                      <button
+                        key={reg.title}
+                        onClick={() => {
+                          setDestinationInput(reg.title === "I'm flexible" ? '' : reg.title);
+                          setActiveSearchSection(null);
+                        }}
+                        className="p-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-slate-900 dark:hover:border-white transition-all text-left group flex flex-col gap-1"
+                      >
+                        <span className="text-2xl">{reg.icon}</span>
+                        <span className="text-xs font-bold text-slate-800 dark:text-slate-200">{reg.title}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* 2. WHEN / DATES */}
+            <div
+              onClick={() => setActiveSearchSection(activeSearchSection === 'when' ? null : 'when')}
+              className={`flex-1 px-6 py-2.5 rounded-full cursor-pointer transition-colors text-left hidden sm:block ${
+                activeSearchSection === 'when' ? 'bg-slate-100 dark:bg-slate-800 shadow-inner' : 'hover:bg-slate-50 dark:hover:bg-slate-800/60'
+              }`}
+            >
+              <p className="text-[11px] font-extrabold text-slate-900 dark:text-white tracking-tight">
+                When
+              </p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                Any week • Flexible
+              </p>
+            </div>
+
+            {/* 3. WHO / GUESTS */}
+            <div
+              onClick={() => setActiveSearchSection(activeSearchSection === 'who' ? null : 'who')}
+              className={`flex-1 px-6 py-2.5 rounded-full cursor-pointer transition-colors text-left relative hidden md:block ${
+                activeSearchSection === 'who' ? 'bg-slate-100 dark:bg-slate-800 shadow-inner' : 'hover:bg-slate-50 dark:hover:bg-slate-800/60'
+              }`}
+            >
+              <p className="text-[11px] font-extrabold text-slate-900 dark:text-white tracking-tight">
+                Who
+              </p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                {travelersCount === 1 ? 'Add guests' : `${travelersCount} travelers`}
+              </p>
+
+              {/* Who Popover */}
+              {activeSearchSection === 'who' && (
+                <div
+                  onClick={e => e.stopPropagation()}
+                  className="absolute right-0 top-16 w-72 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl p-4 z-50 animate-fadeIn space-y-3"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-bold text-xs text-slate-900 dark:text-white">Squad Size</p>
+                      <p className="text-[11px] text-slate-400">Co-travelers looking for spots</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setTravelersCount(Math.max(1, travelersCount - 1))}
+                        className="w-7 h-7 rounded-full border border-slate-300 dark:border-slate-700 flex items-center justify-center text-xs font-bold"
+                      >
+                        -
+                      </button>
+                      <span className="text-xs font-bold">{travelersCount}</span>
+                      <button
+                        onClick={() => setTravelersCount(travelersCount + 1)}
+                        className="w-7 h-7 rounded-full border border-slate-300 dark:border-slate-700 flex items-center justify-center text-xs font-bold"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* 4. CIRCULAR SEARCH BUTTON (Brand Orange #F2541B) */}
+            <div className="pl-2 pr-1">
+              <button
+                onClick={() => {
+                  setActiveSearchSection(null);
+                  const el = document.getElementById('airbnb-listings');
+                  el?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="p-3.5 rounded-full bg-[#F2541B] hover:bg-[#d9440f] text-white shadow-brand transition-transform active:scale-95 flex items-center justify-center"
+              >
+                <Search className="w-4 h-4 stroke-[3]" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* ========================================================================= */}
+        {/* 3. AIRBNB HORIZONTAL CATEGORY ICON BAR & TAX TOGGLE */}
+        {/* ========================================================================= */}
+        <div className="max-w-[1760px] mx-auto px-4 sm:px-8 lg:px-12 flex items-center justify-between gap-6 py-2 border-t border-slate-100 dark:border-slate-800/80">
+          {/* Scrollable Categories with tiny icons & text */}
+          <div className="flex items-center gap-7 overflow-x-auto no-scrollbar py-1">
+            {AIRBNB_CATEGORIES.map(cat => {
+              const isSelected = selectedCategory === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => setSelectedCategory(cat.id)}
+                  className={`flex flex-col items-center gap-2 pb-2 transition-all flex-shrink-0 border-b-2 ${
+                    isSelected
+                      ? 'border-slate-900 dark:border-white text-slate-900 dark:text-white font-bold opacity-100'
+                      : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:border-slate-300 opacity-80'
+                  }`}
+                >
+                  <span className="text-xl leading-none">{cat.icon}</span>
+                  <span className="text-[11px] font-semibold whitespace-nowrap">{cat.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Right Filters & Total Price Toggle (Exact Airbnb Feature) */}
+          <div className="hidden xl:flex items-center gap-3 flex-shrink-0">
+            {/* Filter Pill */}
             <button
               onClick={() => setIsAuthOpen(true)}
-              className="hidden md:block text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-[#F2541B] dark:hover:text-white px-3 py-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-slate-400 text-xs font-bold transition-all"
             >
-              Host an Expedition
+              <SlidersHorizontal className="w-3.5 h-3.5" />
+              <span>Filters</span>
             </button>
 
-            {/* Log In Button */}
-            <button
-              onClick={() => setIsAuthOpen(true)}
-              className="px-4 py-2 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-800 dark:text-white text-xs font-bold transition-all shadow-sm"
-            >
-              Log In
-            </button>
-
-            {/* Sign Up / Enter App CTA (Orange) */}
-            <button
-              onClick={() => setIsAuthOpen(true)}
-              className="px-5 py-2.5 rounded-full bg-[#F2541B] hover:bg-[#d9440f] active:scale-95 text-white font-extrabold text-xs shadow-brand transition-all flex items-center gap-1.5"
-            >
-              <span>Explore Web App</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
+            {/* Display Total Price Toggle Pill */}
+            <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold">
+              <span className="text-slate-700 dark:text-slate-300">Display total before taxes</span>
+              <button
+                onClick={() => setShowTaxes(!showTaxes)}
+                className={`w-9 h-5 rounded-full transition-colors relative p-0.5 ${
+                  showTaxes ? 'bg-slate-900 dark:bg-white' : 'bg-slate-300 dark:bg-slate-700'
+                }`}
+              >
+                <div
+                  className={`w-4 h-4 rounded-full bg-white dark:bg-slate-900 transition-transform ${
+                    showTaxes ? 'translate-x-4' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+            </div>
           </div>
         </div>
       </header>
 
-      {/* 2. HERO SEARCH WIDGET (AIRBNB & MAKEMYTRIP STYLE) */}
-      <section className="relative pt-8 pb-12 sm:pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 w-full">
-        {/* Subtle Ambient Glow */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-[#F2541B]/10 rounded-full blur-3xl pointer-events-none" />
-
-        {/* Hero Copy */}
-        <div className="text-center space-y-4 max-w-3xl mx-auto relative z-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-900/60 shadow-sm">
-            <Plane className="w-3.5 h-3.5 text-[#F2541B]" />
-            <span className="text-xs font-extrabold text-[#F2541B] tracking-wide uppercase">
-              Social Travel Planner & Open Squads
-            </span>
-          </div>
-
-          <h1 className="font-display font-extrabold text-3xl sm:text-5xl lg:text-6xl text-slate-900 dark:text-white tracking-tight leading-tight">
-            Find Open Travel Squads. <br />
-            <span className="text-[#F2541B]">Explore the World Together.</span>
-          </h1>
-
-          <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed">
-            Discover verified community itineraries, send requests to join open spots, collaborate with live thumbs-up voting, and split villa bills with 1-tap Splitwise.
-          </p>
-        </div>
-
-        {/* Mega Search Bar (Airbnb Style) */}
-        <div className="max-w-4xl mx-auto rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-xl p-3 sm:p-4 relative z-20">
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 sm:gap-3 items-center divide-y sm:divide-y-0 sm:divide-x divide-slate-100 dark:divide-slate-800">
-            {/* Field 1: Destination */}
-            <div className="px-3 py-2 space-y-0.5">
-              <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">
-                Where to?
-              </label>
-              <input
-                type="text"
-                value={destinationSearch}
-                onChange={e => setDestinationSearch(e.target.value)}
-                placeholder="Bali, Kyoto, Amalfi..."
-                className="w-full bg-transparent text-xs font-bold text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none"
-              />
-            </div>
-
-            {/* Field 2: Dates */}
-            <div className="px-3 py-2 space-y-0.5">
-              <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">
-                When
-              </label>
-              <div className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1">
-                <Calendar className="w-3.5 h-3.5 text-[#F2541B]" />
-                <span>Any Season / Flexible</span>
-              </div>
-            </div>
-
-            {/* Field 3: Budget Filter */}
-            <div className="px-3 py-2 space-y-0.5">
-              <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">
-                Budget Tier
-              </label>
-              <select
-                value={selectedBudget}
-                onChange={e => setSelectedBudget(e.target.value)}
-                className="w-full bg-transparent text-xs font-bold text-slate-900 dark:text-white focus:outline-none"
-              >
-                <option value="all">Any Budget ($ / $$ / $$$)</option>
-                <option value="budget">Budget (&lt; $1,200)</option>
-                <option value="mid">Mid-Range ($1,200 - $2,500)</option>
-                <option value="luxury">Luxury (&gt; $2,500)</option>
-              </select>
-            </div>
-
-            {/* Field 4: Search Action Button */}
-            <div className="pl-3 py-1 flex items-center justify-end">
-              <button
-                onClick={() => {
-                  const element = document.getElementById('expeditions-grid');
-                  element?.scrollIntoView({ behavior: 'smooth' });
-                }}
-                className="w-full sm:w-auto px-6 py-3.5 rounded-full bg-[#F2541B] hover:bg-[#d9440f] text-white font-extrabold text-xs shadow-brand flex items-center justify-center gap-2 active:scale-95 transition-all"
-              >
-                <Search className="w-4 h-4 stroke-[3]" />
-                <span>Search Expeditions</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Airbnb Category Pill Bar */}
-        <div className="flex items-center justify-center gap-2 overflow-x-auto no-scrollbar pt-4 pb-2 border-b border-slate-200 dark:border-slate-800">
-          {categories.map((cat, idx) => {
-            const isSelected = activeCategory === cat.label;
-            return (
-              <button
-                key={cat.label}
-                onClick={() => setActiveCategory(cat.label)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
-                  isSelected
-                    ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm font-bold'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
-                }`}
-              >
-                {cat.icon}
-                <span>{cat.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* 3. FEATURED EXPEDITIONS GRID (AIRBNB CARD STYLE) */}
-      <section id="expeditions-grid" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 w-full">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
-          <div>
-            <h2 className="font-display font-extrabold text-2xl sm:text-3xl text-slate-900 dark:text-white">
-              Open Community Expeditions ({filteredTrips.length})
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-              Browse joinable squads with available spots or clone itineraries into your personal drafts
-            </p>
-          </div>
-
-          <button
-            onClick={() => setIsAuthOpen(true)}
-            className="text-xs font-bold text-[#F2541B] hover:underline flex items-center gap-1 group"
-          >
-            <span>Sign In to Unlock Full Web App</span>
-            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-          </button>
-        </div>
-
-        {/* Trips Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredTrips.map(trip => {
+      {/* ========================================================================= */}
+      {/* 4. EXACT AIRBNB LISTING CARD GRID */}
+      {/* ========================================================================= */}
+      <main id="airbnb-listings" className="max-w-[1760px] mx-auto px-4 sm:px-8 lg:px-12 py-8 flex-1 w-full space-y-12">
+        {/* Listings Grid: 4 Columns on Large screens like Airbnb */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-10">
+          {filteredTrips.map((trip, index) => {
+            const isLiked = likedTripIds[trip.id];
             const spotsLeft = (trip.maxSpots || 4) - trip.members.length;
+            const isGuestFavorite = index === 0 || index === 2;
+
             return (
               <div
                 key={trip.id}
                 onClick={() => setIsAuthOpen(true)}
-                className="group relative rounded-2xl overflow-hidden bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 flex flex-col justify-between cursor-pointer shadow-sm hover:shadow-md transition-all duration-200"
+                className="group cursor-pointer flex flex-col space-y-3"
               >
-                {/* Cover photo */}
-                <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
+                {/* Image Container with Airbnb Aspect Ratio & Heart */}
+                <div className="relative aspect-square sm:aspect-[20/19] rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800">
                   <img
                     src={trip.coverImage}
                     alt={trip.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
 
-                  <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-600 text-white shadow-sm">
-                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                      <span>{spotsLeft > 0 ? `${spotsLeft} Spots Open` : 'Squad Ready'}</span>
-                    </span>
-
-                    <button
-                      onClick={e => {
-                        e.stopPropagation();
-                        setIsAuthOpen(true);
-                      }}
-                      className="p-1.5 rounded-full bg-white/90 dark:bg-slate-900/90 text-slate-800 dark:text-white shadow-sm"
-                    >
-                      <Heart className="w-3.5 h-3.5 text-[#F2541B] fill-[#F2541B]" />
-                    </button>
+                  {/* Top Left: Airbnb "Guest favorite" or "Open Squad" Badge */}
+                  <div className="absolute top-3 left-3 flex flex-col gap-1">
+                    {isGuestFavorite ? (
+                      <span className="px-2.5 py-1 rounded-full bg-white/95 dark:bg-slate-900/95 text-slate-900 dark:text-white text-[11px] font-extrabold shadow-md backdrop-blur-md flex items-center gap-1">
+                        <span>🏆 Guest favorite</span>
+                      </span>
+                    ) : (
+                      <span className="px-2.5 py-1 rounded-full bg-white/95 dark:bg-slate-900/95 text-[#F2541B] text-[11px] font-extrabold shadow-md backdrop-blur-md flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#F2541B] animate-pulse" />
+                        <span>{spotsLeft > 0 ? `${spotsLeft} spots open` : 'Squad full'}</span>
+                      </span>
+                    )}
                   </div>
 
-                  <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-xs text-white">
-                    <div className="flex items-center gap-1 font-bold drop-shadow">
-                      <MapPin className="w-3.5 h-3.5 text-orange-400" />
-                      <span>{trip.destination}, {trip.country}</span>
+                  {/* Top Right: Heart Floating Button */}
+                  <button
+                    onClick={e => toggleLike(e, trip.id)}
+                    className="absolute top-3 right-3 p-2 text-white hover:scale-110 active:scale-90 transition-transform drop-shadow"
+                  >
+                    <Heart
+                      className={`w-6 h-6 stroke-white stroke-2 ${
+                        isLiked ? 'fill-[#F2541B] stroke-[#F2541B]' : 'fill-black/30'
+                      }`}
+                    />
+                  </button>
+
+                  {/* Bottom Image Overlay: Squad avatars */}
+                  <div className="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between text-white text-xs">
+                    <div className="flex items-center -space-x-1.5">
+                      {trip.members.map((m, mIdx) => (
+                        <img
+                          key={mIdx}
+                          src={m.avatar}
+                          alt={m.name}
+                          className="w-6 h-6 rounded-full object-cover border-2 border-white shadow-sm"
+                        />
+                      ))}
                     </div>
-                    <span className="px-2 py-0.5 rounded bg-black/60 backdrop-blur-md text-[11px] font-medium">
+
+                    <span className="px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-[10px] font-semibold">
                       {trip.durationDays} Days
                     </span>
                   </div>
                 </div>
 
-                {/* Card Body */}
-                <div className="p-4 sm:p-5 space-y-3 flex-1 flex flex-col justify-between">
-                  <div className="space-y-1.5">
-                    <div className="flex items-start justify-between gap-2">
-                      <h3 className="font-display font-bold text-base text-slate-900 dark:text-white group-hover:text-[#F2541B] transition-colors line-clamp-1">
-                        {trip.title}
-                      </h3>
-                      <span className="flex items-center gap-1 text-xs font-bold text-slate-800 dark:text-slate-200">
-                        <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                        <span>4.95</span>
-                      </span>
-                    </div>
-
-                    <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed">
-                      {trip.description}
-                    </p>
-                  </div>
-
-                  {/* Host & Roster */}
-                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <img
-                        src={trip.hostAvatar}
-                        alt={trip.hostName}
-                        className="w-7 h-7 rounded-full object-cover border border-slate-200 dark:border-slate-700"
-                      />
-                      <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">
-                        {trip.hostName.split(' ')[0]}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center -space-x-1.5">
-                      {trip.members.map((m, idx) => (
-                        <img
-                          key={idx}
-                          src={m.avatar}
-                          alt={m.name}
-                          className="w-6 h-6 rounded-full object-cover border-2 border-white dark:border-slate-900"
-                        />
-                      ))}
+                {/* 4-Line Typography (Exact Airbnb Hierarchy) */}
+                <div className="space-y-0.5 text-[15px] leading-snug">
+                  {/* Line 1: Title / Location + Star Rating */}
+                  <div className="flex items-baseline justify-between gap-1">
+                    <h3 className="font-bold text-slate-900 dark:text-white truncate">
+                      {trip.destination}, {trip.country}
+                    </h3>
+                    <div className="flex items-center gap-1 text-xs font-bold text-slate-900 dark:text-white flex-shrink-0">
+                      <Star className="w-3.5 h-3.5 fill-slate-900 dark:fill-white text-slate-900 dark:text-white" />
+                      <span>4.95</span>
                     </div>
                   </div>
 
-                  {/* Price & Join CTA */}
-                  <div className="pt-2 flex items-center justify-between border-t border-slate-100 dark:border-slate-800">
-                    <div>
-                      <span className="text-base font-extrabold text-slate-900 dark:text-white">
-                        ${trip.totalBudget}
-                      </span>
-                      <span className="text-[11px] text-slate-500 dark:text-slate-400 ml-1">total budget</span>
-                    </div>
+                  {/* Line 2: Host & Squad Theme */}
+                  <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                    Hosted by {trip.hostName.split(' ')[0]} • {trip.tags.slice(0, 2).join(' & ')}
+                  </p>
 
-                    <button
-                      onClick={e => {
-                        e.stopPropagation();
-                        setIsAuthOpen(true);
-                      }}
-                      className="px-4 py-2 rounded-full bg-[#F2541B] hover:bg-[#d9440f] text-white font-bold text-xs shadow-brand flex items-center gap-1.5"
-                    >
-                      <UserPlus className="w-3.5 h-3.5" />
-                      <span>Join Squad</span>
-                    </button>
+                  {/* Line 3: Dates */}
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    {trip.startDate} – {trip.endDate}
+                  </p>
+
+                  {/* Line 4: Price Per Person */}
+                  <div className="pt-1 flex items-baseline gap-1 text-sm">
+                    <span className="font-extrabold text-slate-900 dark:text-white">
+                      ${Math.round(trip.totalBudget / (trip.members.length || 1))}
+                    </span>
+                    <span className="text-xs text-slate-600 dark:text-slate-400">per person total</span>
                   </div>
                 </div>
               </div>
             );
           })}
         </div>
-      </section>
 
-      {/* 4. MAKEMYTRIP-STYLE "WHY GLOBTROTTLER" PILLARS */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 w-full mt-16">
-        <div className="p-8 sm:p-12 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-sm space-y-8">
-          <div className="text-center space-y-2 max-w-2xl mx-auto">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#F2541B]">
-              The All-in-One Travel Ecosystem
-            </span>
-            <h2 className="font-display font-extrabold text-2xl sm:text-3xl text-slate-900 dark:text-white">
-              Why Travelers Choose GlobTrottler
-            </h2>
+        {/* ========================================================================= */}
+        {/* 5. AIRBNB-STYLE PROMO BANNER / DISCOVER MORE */}
+        {/* ========================================================================= */}
+        <div className="rounded-3xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 p-8 sm:p-12 text-center space-y-4">
+          <div className="w-12 h-12 mx-auto rounded-2xl bg-orange-100 dark:bg-orange-950/60 text-[#F2541B] flex items-center justify-center shadow-sm">
+            <BrandPlaneIcon size={32} />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2">
-              <div className="w-10 h-10 rounded-xl bg-orange-100 dark:bg-orange-950/60 text-[#F2541B] flex items-center justify-center">
-                <Bot className="w-5 h-5" />
-              </div>
-              <h4 className="font-bold text-sm text-slate-900 dark:text-white">Globi AI Companion</h4>
-              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                Smart assistant that proactively flags open gaps, recommends hidden local spots, and protects your budget.
-              </p>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2">
-              <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-                <Users className="w-5 h-5" />
-              </div>
-              <h4 className="font-bold text-sm text-slate-900 dark:text-white">Open Joinable Trips</h4>
-              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                Hosts post open spots. Travelers send introduction notes, and hosts approve before adding them to group chat.
-              </p>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2">
-              <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center">
-                <Vote className="w-5 h-5" />
-              </div>
-              <h4 className="font-bold text-sm text-slate-900 dark:text-white">Collaborative Voting</h4>
-              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                Co-travelers propose activities and the squad votes with thumbs up/down before confirming items.
-              </p>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2">
-              <div className="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center">
-                <Receipt className="w-5 h-5" />
-              </div>
-              <h4 className="font-bold text-sm text-slate-900 dark:text-white">Splitwise Expense Sync</h4>
-              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                Real-time bilateral debt calculations and 1-tap "Settle Up" with celebratory confetti.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 5. CURATED DESTINATIONS SHOWCASE */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 w-full mt-16">
-        <div>
-          <h2 className="font-display font-extrabold text-2xl sm:text-3xl text-slate-900 dark:text-white">
-            Top Explorer Destinations
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white font-display">
+            Traveling is better when you squad up.
           </h2>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-            Hand-picked spots with top weather, seasonal highlights, and daily budgets
+
+          <p className="text-sm text-slate-600 dark:text-slate-400 max-w-xl mx-auto leading-relaxed">
+            Log in to propose activities, vote in group polls with thumbs up/down, chat with your squad, and automatically settle shared villa expenses.
           </p>
-        </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {MOCK_DESTINATIONS.slice(0, 3).map(dest => (
-            <div
-              key={dest.id}
-              onClick={() => setIsAuthOpen(true)}
-              className="group relative rounded-2xl overflow-hidden bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 aspect-[16/11] cursor-pointer shadow-sm hover:shadow-md transition-all duration-200"
-            >
-              <img
-                src={dest.coverImage}
-                alt={dest.city}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-
-              <div className="absolute top-3 left-3">
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-white/90 dark:bg-slate-900/90 backdrop-blur-md text-slate-900 dark:text-white shadow-sm">
-                  {dest.region}
-                </span>
-              </div>
-
-              <div className="absolute bottom-4 left-4 right-4 space-y-1 text-white">
-                <h3 className="text-xl font-extrabold font-display drop-shadow">
-                  {dest.city}, {dest.country}
-                </h3>
-                <p className="text-xs text-slate-200 line-clamp-1">{dest.tagline}</p>
-                <div className="pt-1 flex items-center justify-between text-xs font-semibold text-orange-300">
-                  <span>${dest.avgBudgetDaily} / day</span>
-                  <span className="group-hover:translate-x-1 transition-transform flex items-center gap-1">
-                    Explore Experiences →
-                  </span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* 6. INSTANT ACCESS / DEMO PERSONAS BANNER */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full mt-16">
-        <div className="p-8 sm:p-12 rounded-3xl bg-slate-900 dark:bg-slate-950 text-white border border-slate-800 shadow-2xl flex flex-col lg:flex-row items-center justify-between gap-8">
-          <div className="space-y-3 max-w-xl">
-            <div className="flex items-center gap-2">
-              <span className="px-3 py-1 rounded-full text-xs font-extrabold uppercase bg-[#F2541B] text-white">
-                Reviewer & Judge Demo Access
-              </span>
-            </div>
-            <h3 className="text-2xl sm:text-3xl font-extrabold font-display">
-              Ready to Test the Full Web App?
-            </h3>
-            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Click below to instantly log in as <strong>Sarah (Host)</strong>, <strong>Alex (Traveler)</strong>, or <strong>Admin</strong> and test real-time collaborative itineraries, squad chats, and Splitwise expense ledgers.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
             <button
               onClick={() => login(availableUsers[0])}
-              className="px-6 py-3.5 rounded-full bg-[#F2541B] hover:bg-[#d9440f] text-white font-extrabold text-xs shadow-brand hover:shadow-brand-lg active:scale-95 transition-all flex items-center gap-2"
+              className="px-6 py-3 rounded-full bg-[#F2541B] hover:bg-[#d9440f] text-white font-bold text-xs shadow-brand transition-all flex items-center gap-2"
             >
-              <span>1-Click Enter as Sarah (Host)</span>
+              <span>1-Click Enter as Sarah (Superhost)</span>
               <ArrowRight className="w-4 h-4" />
             </button>
+
             <button
               onClick={() => setIsAuthOpen(true)}
-              className="px-5 py-3.5 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 transition-all"
+              className="px-5 py-3 rounded-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white font-bold text-xs hover:bg-slate-50 dark:hover:bg-slate-700 transition-all"
             >
-              Select Another Persona
+              Sign up with Email
             </button>
           </div>
         </div>
-      </section>
+      </main>
 
-      {/* 7. FOOTER */}
-      <footer className="w-full border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 transition-colors duration-200 mt-20 py-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-400">
-          <div className="flex items-center gap-2">
-            <BrandPlaneIcon className="w-6 h-6" />
-            <span className="font-bold text-slate-900 dark:text-white">GlobTrottler</span>
-            <span>• © 2026 All rights reserved.</span>
+      {/* ========================================================================= */}
+      {/* 6. AIRBNB FOOTER */}
+      {/* ========================================================================= */}
+      <footer className="border-t border-slate-200 dark:border-slate-800 bg-[#F7F7F7] dark:bg-slate-950 py-12 transition-colors">
+        <div className="max-w-[1760px] mx-auto px-4 sm:px-8 lg:px-12 space-y-8 text-xs text-slate-600 dark:text-slate-400">
+          {/* 4 Column Links */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 pb-8 border-b border-slate-200 dark:border-slate-800">
+            <div className="space-y-3">
+              <h4 className="font-bold text-slate-900 dark:text-white text-xs">Support</h4>
+              <ul className="space-y-2">
+                <li><button onClick={() => setIsAuthOpen(true)} className="hover:underline">Help Centre</button></li>
+                <li><button onClick={() => setIsGlobiOpen(true)} className="hover:underline">Ask Globi AI</button></li>
+                <li><button onClick={() => setIsAuthOpen(true)} className="hover:underline">Safety information</button></li>
+                <li><button onClick={() => setIsAuthOpen(true)} className="hover:underline">Cancellation options</button></li>
+              </ul>
+            </div>
+
+            <div className="space-y-3">
+              <h4 className="font-bold text-slate-900 dark:text-white text-xs">Community</h4>
+              <ul className="space-y-2">
+                <li><button onClick={() => setIsAuthOpen(true)} className="hover:underline">GlobTrottler squads</button></li>
+                <li><button onClick={() => setIsAuthOpen(true)} className="hover:underline">Collaborative voting</button></li>
+                <li><button onClick={() => setIsAuthOpen(true)} className="hover:underline">Splitwise ledger</button></li>
+                <li><button onClick={() => setIsAuthOpen(true)} className="hover:underline">Digital passport stamps</button></li>
+              </ul>
+            </div>
+
+            <div className="space-y-3">
+              <h4 className="font-bold text-slate-900 dark:text-white text-xs">Hosting</h4>
+              <ul className="space-y-2">
+                <li><button onClick={() => setIsAuthOpen(true)} className="hover:underline">Host an expedition</button></li>
+                <li><button onClick={() => setIsAuthOpen(true)} className="hover:underline">Open joinable spots</button></li>
+                <li><button onClick={() => setIsAuthOpen(true)} className="hover:underline">Host community guidelines</button></li>
+              </ul>
+            </div>
+
+            <div className="space-y-3">
+              <h4 className="font-bold text-slate-900 dark:text-white text-xs">GlobTrottler</h4>
+              <ul className="space-y-2">
+                <li><button onClick={() => setIsAuthOpen(true)} className="hover:underline">Newsroom</button></li>
+                <li><button onClick={() => setIsAuthOpen(true)} className="hover:underline">New features</button></li>
+                <li><button onClick={() => setIsAuthOpen(true)} className="hover:underline">Careers</button></li>
+                <li><button onClick={() => setIsAuthOpen(true)} className="hover:underline">Investors</button></li>
+              </ul>
+            </div>
           </div>
-          <div className="flex items-center gap-4">
-            <button onClick={() => setIsAuthOpen(true)} className="hover:text-[#F2541B]">Log In</button>
-            <button onClick={() => setIsAuthOpen(true)} className="hover:text-[#F2541B]">Sign Up</button>
-            <button onClick={() => setIsGlobiOpen(true)} className="hover:text-[#F2541B]">Ask Globi AI</button>
+
+          {/* Bottom Copyright Bar */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <span>© 2026 GlobTrottler, Inc.</span>
+              <span>·</span>
+              <button onClick={() => setIsAuthOpen(true)} className="hover:underline">Privacy</button>
+              <span>·</span>
+              <button onClick={() => setIsAuthOpen(true)} className="hover:underline">Terms</button>
+              <span>·</span>
+              <button onClick={() => setIsAuthOpen(true)} className="hover:underline">Sitemap</button>
+            </div>
+
+            <div className="flex items-center gap-4 font-semibold text-slate-800 dark:text-slate-200">
+              <span className="flex items-center gap-1">🌐 English (IN)</span>
+              <span>₹ INR</span>
+            </div>
           </div>
         </div>
       </footer>
