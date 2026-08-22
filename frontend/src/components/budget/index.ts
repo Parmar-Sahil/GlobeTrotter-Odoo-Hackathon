@@ -1,0 +1,2 @@
+// Budget components placeholder
+export {};

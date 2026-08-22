@@ -1,0 +1,2 @@
+// Activities components placeholder
+export {};

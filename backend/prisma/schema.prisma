@@ -1,0 +1,14 @@
+// GlobeTrotter Prisma Schema
+// Database configuration for PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Domain models (User, Trip, City, TripStop, Activity, ItineraryItem, BudgetItem, TripCollaborator, ShareLink, SavedDestination)
+// will be defined in the next phase after schema review.
