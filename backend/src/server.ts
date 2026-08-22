@@ -1,32 +1,23 @@
-import app from "./app.js";
-import config from "./config/env.js";
+import app from './app';
+import { env } from './config/env.config';
+import { prisma } from './config/prisma.config';
 
-const PORT = config.port;
+const PORT = env.PORT || 5000;
 
 const server = app.listen(PORT, () => {
-  console.log(`========================================`);
-  console.log(`  GlobeTrotter Backend API`);
-  console.log(`  Environment: ${config.nodeEnv}`);
-  console.log(`  Listening on: http://localhost:${PORT}`);
-  console.log(`  Health check: http://localhost:${PORT}/api/health`);
-  console.log(`========================================`);
+  console.log(`🚀 GlobeTrotter Backend Server running on port ${PORT} in ${env.NODE_ENV} mode`);
 });
 
-// Handle graceful shutdown
-process.on("SIGTERM", () => {
-  console.log("SIGTERM signal received: closing HTTP server");
-  server.close(() => {
-    console.log("HTTP server closed");
+// Graceful Shutdown
+const handleShutdown = async (signal: string) => {
+  console.log(`\n⚠️  Received ${signal}. Shutting down gracefully...`);
+  server.close(async () => {
+    console.log('🔒 HTTP Server closed.');
+    await prisma.$disconnect();
+    console.log('🔌 Database disconnected.');
     process.exit(0);
   });
-});
+};
 
-process.on("SIGINT", () => {
-  console.log("SIGINT signal received: closing HTTP server");
-  server.close(() => {
-    console.log("HTTP server closed");
-    process.exit(0);
-  });
-});
-
-export default server;
+process.on('SIGTERM', () => handleShutdown('SIGTERM'));
+process.on('SIGINT', () => handleShutdown('SIGINT'));
