@@ -1,13 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect, use, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { BrandLogo } from "@/components/common/BrandLogo";
 import { useTrip, useTripMutations } from "@/hooks/use-trips";
 import { useAuth } from "@/hooks/use-auth";
 import { formatDate, formatCurrency } from "@/lib/utils";
-import { tripService } from "@/lib/services/trip.service";
 import {
   Calendar,
   MapPin,
@@ -22,10 +21,9 @@ import {
   Share2,
   Lock,
   ChevronRight,
-  Sun,
   ShieldCheck,
   AlertCircle,
-  Tag,
+  RotateCcw,
   PieChart as PieIcon,
 } from "lucide-react";
 
@@ -41,10 +39,11 @@ function SharedTripContent({ token }: { token: string }) {
   const actionParam = searchParams.get("action");
 
   const { data: trip, isLoading, isError } = useTrip(token);
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
+  const { copyTrip, isCopying } = useTripMutations();
 
-  const [isCopying, setIsCopying] = useState(false);
   const [copiedSuccess, setCopiedSuccess] = useState(false);
+  const [copyError, setCopyError] = useState<string | null>(null);
   const [shareLinkCopied, setShareLinkCopied] = useState(false);
   const [activeViewTab, setActiveViewTab] = useState<"itinerary" | "budget">("itinerary");
 
@@ -116,62 +115,28 @@ function SharedTripContent({ token }: { token: string }) {
 
   // Main Copy Trip Flow with deep duplication of sections and activities
   const handleCopyTrip = async () => {
-    if (!trip) return;
+    if (!trip || isCopying || copiedSuccess) return;
 
     if (!isAuthenticated) {
       router.push(`/login?redirect=/shared/${token}&action=copy`);
       return;
     }
 
-    setIsCopying(true);
     try {
-      // 1. Create base cloned trip
-      const newTrip = await tripService.createTrip({
-        title: `${trip.title} (Copy)`,
-        description: trip.description || undefined,
-        startDate: trip.startDate,
-        endDate: trip.endDate,
-        budgetLimit: trip.budgetLimit || undefined,
-        coverImage: trip.coverImage || undefined,
-        visibility: "PRIVATE",
-      });
-
-      // 2. Clone all stops and scheduled activities if present
-      if (trip.sections && trip.sections.length > 0) {
-        for (const sec of trip.sections) {
-          const newSec = await tripService.addSection(newTrip.id, {
-            title: sec.title || sec.destination?.name || "Travel Stop",
-            destinationId: sec.destinationId || undefined,
-            arrivalDate: sec.arrivalDate || undefined,
-            departureDate: sec.departureDate || undefined,
-          });
-
-          if (sec.items && sec.items.length > 0) {
-            for (const item of sec.items) {
-              await tripService.addItem(newSec.id, {
-                title: item.title,
-                description: item.description || undefined,
-                activityId: item.activityId || undefined,
-                category: item.category || (item.activity?.category as any) || undefined,
-                startTime: item.startTime || undefined,
-                endTime: item.endTime || undefined,
-                durationMinutes: item.durationMinutes || undefined,
-                cost: item.cost || undefined,
-              });
-            }
-          }
-        }
-      }
-
+      setCopyError(null);
+      const newTrip = await copyTrip(trip);
       setCopiedSuccess(true);
       setTimeout(() => {
         router.push(`/trips/${newTrip.id}`);
-      }, 1000);
-    } catch (err) {
+      }, 800);
+    } catch (err: any) {
       console.error("Failed to copy trip:", err);
-      alert("Failed to copy this trip. Please try again.");
-    } finally {
-      setIsCopying(false);
+      const rawMsg = err.response?.data?.message || err.message || "";
+      if (rawMsg.includes("Can't reach database") || rawMsg.includes("localhost:5432")) {
+        setCopyError("Database is offline. Please make sure PostgreSQL is running on port 5432.");
+      } else {
+        setCopyError(rawMsg || "Couldn't copy this trip. Please try again.");
+      }
     }
   };
 
@@ -324,6 +289,23 @@ function SharedTripContent({ token }: { token: string }) {
 
       {/* Main Container */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        {/* Error / Retry Banner if copy fails */}
+        {copyError && (
+          <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+            <div className="flex items-center gap-2.5">
+              <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
+              <span className="text-xs font-medium">{copyError}</span>
+            </div>
+            <button
+              type="button"
+              onClick={handleCopyTrip}
+              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shrink-0 transition-colors shadow-xs"
+            >
+              <RotateCcw className="w-3.5 h-3.5" /> Try Again
+            </button>
+          </div>
+        )}
+
         {/* 2. Editorial Panoramic Hero Banner */}
         <div className="relative rounded-3xl overflow-hidden shadow-xl shadow-orange-950/15 border border-orange-100 bg-[#2A0E06] text-white p-6 sm:p-10 lg:p-12 space-y-6">
           <div className="absolute inset-0 h-full w-full pointer-events-none">
@@ -436,7 +418,8 @@ function SharedTripContent({ token }: { token: string }) {
           <button
             type="button"
             onClick={handleCopyTrip}
-            className="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold text-[#7C2D12] hover:underline"
+            disabled={isCopying || copiedSuccess}
+            className="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold text-[#7C2D12] hover:underline disabled:opacity-50"
           >
             <Copy className="w-3.5 h-3.5" /> Copy this itinerary
           </button>
@@ -684,5 +667,9 @@ function SharedTripContent({ token }: { token: string }) {
 
 export default function SharedTripPage({ params }: SharedTripPageProps) {
   const { token } = use(params);
-  return <SharedTripContent token={token} />;
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#FAF7F2]" />}>
+      <SharedTripContent token={token} />
+    </Suspense>
+  );
 }

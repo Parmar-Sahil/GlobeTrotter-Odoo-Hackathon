@@ -20,13 +20,23 @@ export interface User {
   firstName?: string | null;
   lastName?: string | null;
   avatarUrl?: string | null;
+  profilePhotoUrl?: string | null;
+  phone?: string | null;
+  phoneNumber?: string | null;
   bio?: string | null;
   city?: string | null;
   country?: string | null;
   preferredLanguage?: string;
+  language?: string;
   currency?: string;
   role?: string;
+  status?: string;
   createdAt?: string;
+  _count?: {
+    trips?: number;
+    communityPosts?: number;
+    savedDestinations?: number;
+  };
 }
 
 export interface AuthResponse {

@@ -157,6 +157,15 @@ export function useTripMutations(tripId?: string) {
     },
   });
 
+  const copyTripMutation = useMutation({
+    mutationFn: (sourceTrip: any) => tripService.copyTrip(sourceTrip),
+    onSuccess: (newTrip) => {
+      queryClient.invalidateQueries({ queryKey: ["trips"] });
+      queryClient.invalidateQueries({ queryKey: ["trips", "my-trips"] });
+      queryClient.invalidateQueries({ queryKey: ["trips", newTrip.id] });
+    },
+  });
+
   return {
     createTrip: createTripMutation.mutateAsync,
     isCreating: createTripMutation.isPending,
@@ -185,5 +194,9 @@ export function useTripMutations(tripId?: string) {
 
     deleteItem: deleteItemMutation.mutateAsync,
     isDeletingItem: deleteItemMutation.isPending,
+
+    copyTrip: copyTripMutation.mutateAsync,
+    isCopying: copyTripMutation.isPending,
+    copyError: copyTripMutation.error,
   };
 }

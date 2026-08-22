@@ -181,4 +181,46 @@ export const tripService = {
     });
     return res.data.data;
   },
+
+  async copyTrip(sourceTrip: Trip): Promise<Trip> {
+    // 1. Create base cloned trip
+    const newTrip = await this.createTrip({
+      title: `${sourceTrip.title} (Copy)`,
+      description: sourceTrip.description || undefined,
+      startDate: sourceTrip.startDate,
+      endDate: sourceTrip.endDate,
+      budgetLimit: sourceTrip.budgetLimit || undefined,
+      coverImage: sourceTrip.coverImage || undefined,
+      visibility: "PRIVATE",
+    });
+
+    // 2. Clone all stops and scheduled activities
+    if (sourceTrip.sections && sourceTrip.sections.length > 0) {
+      for (const sec of sourceTrip.sections) {
+        const newSec = await this.addSection(newTrip.id, {
+          title: sec.title || sec.destination?.name || "Travel Stop",
+          destinationId: sec.destinationId || undefined,
+          arrivalDate: sec.arrivalDate || undefined,
+          departureDate: sec.departureDate || undefined,
+        });
+
+        if (sec.items && sec.items.length > 0) {
+          for (const item of sec.items) {
+            await this.addItem(newSec.id, {
+              title: item.title,
+              description: item.description || undefined,
+              activityId: item.activityId || undefined,
+              category: item.category || (item.activity?.category as any) || undefined,
+              startTime: item.startTime || undefined,
+              endTime: item.endTime || undefined,
+              durationMinutes: item.durationMinutes || undefined,
+              cost: item.cost || undefined,
+            });
+          }
+        }
+      }
+    }
+
+    return newTrip;
+  },
 };
