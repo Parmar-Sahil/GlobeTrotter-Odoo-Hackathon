@@ -1,30 +1,84 @@
-import Link from "next/link";
-import { Compass } from "lucide-react";
+"use client";
 
-export default function Home() {
+import React from "react";
+import { SmoothScrollProvider } from "@/components/providers/smooth-scroll-provider";
+import { motion, useScroll, useSpring } from "framer-motion";
+import { LandingNavbar } from "@/components/landing/LandingNavbar";
+import { Hero } from "@/components/landing/Hero";
+import { PlanningSearch } from "@/components/landing/PlanningSearch";
+import { TravelCategories } from "@/components/landing/TravelCategories";
+import { DestinationShowcase } from "@/components/landing/DestinationShowcase";
+import { ExperienceShowcase } from "@/components/landing/ExperienceShowcase";
+import { MultiCityJourney } from "@/components/landing/MultiCityJourney";
+import { ItineraryPreview } from "@/components/landing/ItineraryPreview";
+import { BudgetPreview } from "@/components/landing/BudgetPreview";
+import { TimelinePreview } from "@/components/landing/TimelinePreview";
+import { TravelInspiration } from "@/components/landing/TravelInspiration";
+import { ShareJourney } from "@/components/landing/ShareJourney";
+import { FinalCTA } from "@/components/landing/FinalCTA";
+import { LandingFooter } from "@/components/landing/LandingFooter";
+
+export default function HomePage() {
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001,
+  });
+
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-b from-slate-50 to-slate-100 text-slate-900">
-      <div className="max-w-md w-full text-center space-y-6">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-500/30">
-          <Compass className="w-8 h-8" />
-        </div>
-        <div className="space-y-2">
-          <h1 className="text-4xl font-bold tracking-tight text-slate-900">
-            GlobeTrotter
-          </h1>
-          <p className="text-lg text-slate-600 font-medium">
-            Personalized Travel Planning
-          </p>
-        </div>
-        <div className="pt-2">
-          <Link
-            href="/dashboard"
-            className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-blue-600 text-white font-semibold shadow-md hover:bg-blue-700 transition-colors"
-          >
-            Get Started
-          </Link>
-        </div>
+    <SmoothScrollProvider>
+      {/* Minimal Top Scroll Progress Bar */}
+      <motion.div
+        className="fixed top-0 left-0 right-0 h-1 bg-[#F95724] origin-left z-50 pointer-events-none"
+        style={{ scaleX }}
+      />
+
+      <div className="min-h-screen flex flex-col bg-white text-slate-900 selection:bg-orange-100 selection:text-orange-900">
+        {/* 1. Floating Navbar */}
+        <LandingNavbar />
+
+        <main className="flex-1">
+          {/* 2. Hero Section */}
+          <Hero />
+
+          {/* 3. Search / Start Planning Module */}
+          <PlanningSearch />
+
+          {/* 4. Travel Categories */}
+          <TravelCategories />
+
+          {/* 5. Destination Discovery */}
+          <DestinationShowcase />
+
+          {/* 6. Experience Discovery */}
+          <ExperienceShowcase />
+
+          {/* 7. Multi-City Journey & Route */}
+          <MultiCityJourney />
+
+          {/* 8. Itinerary Preview (Day 3 Goa) */}
+          <ItineraryPreview />
+
+          {/* 9. Budget Preview */}
+          <BudgetPreview />
+
+          {/* 10. Calendar / Timeline Preview */}
+          <TimelinePreview />
+
+          {/* 11. Travel Inspiration */}
+          <TravelInspiration />
+
+          {/* 12. Share Your Journey */}
+          <ShareJourney />
+
+          {/* 13. Final CTA */}
+          <FinalCTA />
+        </main>
+
+        {/* 14. Footer */}
+        <LandingFooter />
       </div>
-    </main>
+    </SmoothScrollProvider>
   );
 }
