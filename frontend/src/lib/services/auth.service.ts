@@ -1,38 +1,59 @@
 import apiClient from "../api";
 import { AuthResponse, User, ApiResponse } from "@/types";
 
+export interface RegisterDto {
+  username: string;
+  email: string;
+  password: string;
+  firstName?: string;
+  lastName?: string;
+  city?: string;
+  country?: string;
+  bio?: string;
+}
+
+export interface LoginDto {
+  usernameOrEmail?: string;
+  email?: string;
+  password: string;
+}
+
 export const authService = {
-  async register(data: {
-    email: string;
-    username: string;
-    password: string;
-    firstName?: string;
-    lastName?: string;
-  }): Promise<AuthResponse> {
+  async register(data: RegisterDto): Promise<AuthResponse> {
     const res = await apiClient.post<ApiResponse<AuthResponse>>("/auth/register", data);
-    if (res.data?.data?.token) {
+    const authData = res.data.data!;
+    if (authData.token) {
       if (typeof window !== "undefined") {
-        localStorage.setItem("token", res.data.data.token);
-        localStorage.setItem("user", JSON.stringify(res.data.data.user));
+        localStorage.setItem("token", authData.token);
+        localStorage.setItem("user", JSON.stringify(authData.user));
       }
     }
-    return res.data.data!;
+    return authData;
   },
 
-  async login(data: { email: string; password: string }): Promise<AuthResponse> {
-    const res = await apiClient.post<ApiResponse<AuthResponse>>("/auth/login", data);
-    if (res.data?.data?.token) {
+  async login(data: LoginDto): Promise<AuthResponse> {
+    const payload = {
+      usernameOrEmail: data.usernameOrEmail || data.email,
+      password: data.password,
+    };
+    const res = await apiClient.post<ApiResponse<AuthResponse>>("/auth/login", payload);
+    const authData = res.data.data!;
+    if (authData.token) {
       if (typeof window !== "undefined") {
-        localStorage.setItem("token", res.data.data.token);
-        localStorage.setItem("user", JSON.stringify(res.data.data.user));
+        localStorage.setItem("token", authData.token);
+        localStorage.setItem("user", JSON.stringify(authData.user));
       }
     }
-    return res.data.data!;
+    return authData;
   },
 
   async getMe(): Promise<User> {
-    const res = await apiClient.get<ApiResponse<{ user: User }>>("/auth/me");
-    return res.data.data!.user;
+    const res = await apiClient.get<ApiResponse<{ user: User } | User>>("/auth/me");
+    const data: any = res.data.data;
+    if (data?.user) {
+      return data.user;
+    }
+    return data as User;
   },
 
   logout(): void {

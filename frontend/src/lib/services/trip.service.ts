@@ -9,9 +9,12 @@ import {
 
 export interface CreateTripDto {
   title: string;
+  cityId?: string;
+  destinationId?: string;
   description?: string;
   startDate: string;
   endDate: string;
+  totalBudget?: number;
   budgetLimit?: number;
   currency?: string;
   coverImage?: string;
@@ -24,8 +27,11 @@ export interface UpdateTripDto extends Partial<CreateTripDto> {
 
 export interface AddSectionDto {
   destinationId?: string;
+  cityId?: string;
   title: string;
   date?: string;
+  startDate?: string;
+  endDate?: string;
   arrivalDate?: string;
   departureDate?: string;
   order?: number;
@@ -34,11 +40,13 @@ export interface AddSectionDto {
 export interface AddItemDto {
   activityId?: string;
   title: string;
+  itemType?: "activity" | "transport" | "accommodation" | "meal" | "other";
   description?: string;
   startTime?: string;
   endTime?: string;
   durationMinutes?: number;
   cost?: number;
+  costEstimate?: number;
   order?: number;
   category?: string;
 }
@@ -64,7 +72,13 @@ export const tripService = {
   },
 
   async createTrip(data: CreateTripDto): Promise<Trip> {
-    const res = await apiClient.post<ApiResponse<Trip>>("/trips", data);
+    const payload: any = {
+      ...data,
+      totalBudget: data.totalBudget || data.budgetLimit,
+      budgetLimit: data.budgetLimit || data.totalBudget,
+      cityId: data.cityId || data.destinationId,
+    };
+    const res = await apiClient.post<ApiResponse<Trip>>("/trips", payload);
     return res.data.data!;
   },
 
@@ -78,17 +92,30 @@ export const tripService = {
   },
 
   async addSection(tripId: string, data: AddSectionDto): Promise<ItinerarySection> {
+    const payload: any = {
+      ...data,
+      cityId: data.cityId || data.destinationId,
+      destinationId: data.destinationId || data.cityId,
+      startDate: data.startDate || data.arrivalDate || data.date,
+      endDate: data.endDate || data.departureDate || data.date,
+    };
     const res = await apiClient.post<ApiResponse<ItinerarySection>>(
       `/trips/${tripId}/sections`,
-      data
+      payload
     );
     return res.data.data!;
   },
 
   async addItem(sectionId: string, data: AddItemDto): Promise<ItineraryItem> {
+    const payload: any = {
+      ...data,
+      costEstimate: data.costEstimate || data.cost,
+      cost: data.cost || data.costEstimate,
+      itemType: data.itemType || "activity",
+    };
     const res = await apiClient.post<ApiResponse<ItineraryItem>>(
       `/trips/sections/${sectionId}/items`,
-      data
+      payload
     );
     return res.data.data!;
   },

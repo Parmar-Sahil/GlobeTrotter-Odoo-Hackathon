@@ -1,16 +1,22 @@
 import apiClient from "../api";
 import { Activity, ActivityCategory, ApiResponse } from "@/types";
 
+export interface ActivitySearchParams {
+  city?: string;
+  query?: string;
+  destinationId?: string;
+  category?: ActivityCategory | string;
+  minCost?: number;
+  maxCost?: number;
+  sortBy?: "popularityScore" | "cost" | "rating" | "createdAt";
+  sortOrder?: "asc" | "desc";
+  groupBy?: "category" | "city";
+  page?: number;
+  limit?: number;
+}
+
 export const activityService = {
-  async search(params?: {
-    query?: string;
-    destinationId?: string;
-    category?: ActivityCategory;
-    minCost?: number;
-    maxCost?: number;
-    page?: number;
-    limit?: number;
-  }): Promise<{ activities: Activity[]; meta?: any }> {
+  async search(params?: ActivitySearchParams): Promise<{ activities: Activity[]; meta?: any }> {
     const res = await apiClient.get<ApiResponse<Activity[]>>(
       "/activities/search",
       { params }
