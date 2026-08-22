@@ -32,12 +32,41 @@ export const addSectionToTrip = async (
   });
   const stopOrder = (lastStop?.stopOrder || 0) + 1;
 
-  // Get or pick a cityId if not provided
+  // Get or pick a cityId if not provided, or auto-create custom city
   let cityId = data.cityId || data.destinationId;
-  if (!cityId) {
-    const firstCity = await prisma.city.findFirst({ select: { id: true } });
-    cityId = firstCity?.id || '';
+  let city = null;
+
+  if (cityId) {
+    city = await prisma.city.findUnique({ where: { id: cityId } });
   }
+
+  if (!city && data.title) {
+    city = await prisma.city.findFirst({
+      where: { name: { equals: data.title, mode: 'insensitive' } },
+    });
+  }
+
+  if (!city && data.title) {
+    try {
+      city = await prisma.city.create({
+        data: {
+          name: data.title,
+          countryCode: 'IN',
+          country: 'India',
+          description: `Custom destination for ${data.title}`,
+          imageUrl: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&auto=format&fit=crop&q=80',
+        },
+      });
+    } catch {
+      city = await prisma.city.findFirst();
+    }
+  }
+
+  if (!city) {
+    city = await prisma.city.findFirst();
+  }
+
+  cityId = city ? city.id : '';
 
   return await prisma.tripStop.create({
     data: {
