@@ -1,7 +1,6 @@
 "use client";
 
 import React, { ReactNode } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { BrandLogo } from "@/components/common/BrandLogo";
@@ -18,23 +17,23 @@ export function AuthLayout({
   children,
   heading,
   subheading,
-  heroImage = "https://images.unsplash.com/photo-1507525428033-b723cf961d3e?w=1600&auto=format&fit=crop&q=85",
+  heroImage = "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=1600&auto=format&fit=crop&q=85",
 }: AuthLayoutProps) {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen flex bg-[#FAF7F4] text-slate-900 selection:bg-orange-100 selection:text-orange-900">
-      {/* Left Panel: Desktop Cinematic Travel Visual */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-slate-950 text-white p-12 flex-col justify-between">
+    <div className="min-h-screen w-full grid grid-cols-1 lg:grid-cols-2 bg-[#FAF7F4] text-slate-900 selection:bg-orange-100 selection:text-orange-900 overflow-x-hidden">
+      {/* Left Column: Desktop Cinematic Travel Visual (Exactly 50% on Desktop) */}
+      <div className="hidden lg:flex relative overflow-hidden bg-slate-950 text-white p-8 xl:p-12 flex-col justify-between min-h-screen">
         {/* Background Image with Depth Gradients */}
-        <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <img
             src={heroImage}
             alt="GlobTrottler Scenic Travel"
-            className="w-full h-full object-cover opacity-55 scale-105 transition-transform duration-1000"
+            className="w-full h-full object-cover opacity-50"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-slate-950/60" />
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/50 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/40 via-transparent to-transparent" />
         </div>
 
         {/* Top Branding on Hero */}
@@ -72,8 +71,8 @@ export function AuthLayout({
         </div>
       </div>
 
-      {/* Right Panel: Clean Authentication Container */}
-      <div className="w-full lg:w-1/2 flex flex-col justify-between p-4 sm:p-8 lg:p-12 overflow-y-auto">
+      {/* Right Column: Clean Authentication Container (Exactly 50% on Desktop, 100% on Mobile) */}
+      <div className="w-full flex flex-col justify-between p-4 sm:p-8 lg:p-12 overflow-y-auto min-h-screen bg-[#FAF7F4]">
         {/* Top Header Bar */}
         <div className="flex items-center justify-between max-w-md w-full mx-auto pb-4">
           <button
@@ -98,13 +97,13 @@ export function AuthLayout({
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45, ease: [0.21, 0.47, 0.32, 0.98] }}
+            transition={{ duration: 0.4, ease: [0.21, 0.47, 0.32, 0.98] }}
             className="bg-white rounded-3xl border border-orange-100/80 shadow-xl shadow-orange-950/5 p-6 sm:p-8 space-y-6"
           >
             {/* Form Header */}
             <div className="text-center space-y-2">
               <div className="w-14 h-14 rounded-2xl bg-orange-50 text-[#F95724] flex items-center justify-center mx-auto shadow-inner mb-3">
-                <Compass className="w-7 h-7 animate-spin-slow" />
+                <Compass className="w-7 h-7" />
               </div>
               <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
                 {heading}
