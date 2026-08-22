@@ -1,0 +1,2 @@
+// Trip components placeholder
+export {};
