@@ -3,45 +3,43 @@ import { parsePagination, buildMeta } from '../../utils/pagination.util';
 import { Prisma } from '@prisma/client';
 
 export const getTopRegionalDestinations = async () => {
-  // Fetch popular destinations grouped by region with explicit selective fields
-  const destinations = await prisma.destination.findMany({
-    where: { isPopular: true },
+  const cities = await prisma.city.findMany({
+    where: { isActive: true },
     select: {
       id: true,
       name: true,
       country: true,
+      countryCode: true,
       region: true,
       description: true,
       imageUrl: true,
-      bannerUrl: true,
-      rating: true,
-      visitCount: true,
+      popularityScore: true,
+      costIndex: true,
       _count: {
-        select: { activities: true, trips: true },
+        select: { activities: true, tripStops: true },
       },
     },
-    orderBy: { rating: 'desc' },
+    orderBy: { popularityScore: 'desc' },
     take: 12,
   });
 
-  // Efficiently group by region in-memory (Rule 2: avoid N+1 queries)
-  const groupedByRegion = destinations.reduce((acc, dest) => {
-    const region = dest.region || 'Other';
+  const groupedByRegion = cities.reduce((acc, city) => {
+    const region = city.region || 'Other';
     if (!acc[region]) {
       acc[region] = [];
     }
-    acc[region].push(dest);
+    acc[region].push(city);
     return acc;
-  }, {} as Record<string, typeof destinations>);
+  }, {} as Record<string, typeof cities>);
 
   return groupedByRegion;
 };
 
 export const searchDestinations = async (query: any) => {
   const { page, limit, skip } = parsePagination(query);
-  const { search, region, isPopular, sortBy = 'rating', sortOrder = 'desc' } = query;
+  const { search, region, sortBy = 'popularityScore', sortOrder = 'desc' } = query;
 
-  const whereClause: Prisma.DestinationWhereInput = {};
+  const whereClause: Prisma.CityWhereInput = { isActive: true };
 
   if (search) {
     whereClause.OR = [
@@ -55,25 +53,21 @@ export const searchDestinations = async (query: any) => {
     whereClause.region = { equals: region };
   }
 
-  if (isPopular !== undefined) {
-    whereClause.isPopular = isPopular === 'true';
-  }
-
   const orderBy = { [sortBy]: sortOrder };
 
-  const [destinations, totalItems] = await Promise.all([
-    prisma.destination.findMany({
+  const [cities, totalItems] = await Promise.all([
+    prisma.city.findMany({
       where: whereClause,
       select: {
         id: true,
         name: true,
         country: true,
+        countryCode: true,
         region: true,
         description: true,
         imageUrl: true,
-        bannerUrl: true,
-        rating: true,
-        visitCount: true,
+        popularityScore: true,
+        costIndex: true,
         _count: {
           select: { activities: true },
         },
@@ -82,58 +76,60 @@ export const searchDestinations = async (query: any) => {
       skip,
       take: limit,
     }),
-    prisma.destination.count({ where: whereClause }),
+    prisma.city.count({ where: whereClause }),
   ]);
 
   const meta = buildMeta(totalItems, page, limit);
-  return { destinations, meta };
+  return { destinations: cities, meta };
 };
 
 export const getDestinationById = async (id: string) => {
-  const destination = await prisma.destination.findUnique({
+  const city = await prisma.city.findUnique({
     where: { id },
     select: {
       id: true,
       name: true,
       country: true,
+      countryCode: true,
       region: true,
       description: true,
       imageUrl: true,
-      bannerUrl: true,
-      rating: true,
-      visitCount: true,
+      popularityScore: true,
+      costIndex: true,
+      latitude: true,
+      longitude: true,
+      timezone: true,
       activities: {
         select: {
           id: true,
-          title: true,
+          name: true,
           category: true,
           description: true,
           imageUrl: true,
-          estimatedPrice: true,
-          estimatedDurationHours: true,
-          rating: true,
-          isPopular: true,
+          estimatedCost: true,
+          durationMinutes: true,
+          popularityScore: true,
         },
-        orderBy: { isPopular: 'desc' },
+        orderBy: { popularityScore: 'desc' },
       },
     },
   });
 
-  if (!destination) {
-    throw new Error('Destination not found');
+  if (!city) {
+    throw new Error('Destination city not found');
   }
 
-  // Asynchronously increment visitCount for analytics (non-blocking)
-  prisma.destination.update({
+  // Non-blocking popularity update for analytics
+  prisma.city.update({
     where: { id },
-    data: { visitCount: { increment: 1 } },
-  }).catch((err) => console.error('Failed to increment visitCount:', err));
+    data: { popularityScore: { increment: 0.1 } },
+  }).catch((err) => console.error('Failed to update popularity score:', err));
 
-  return destination;
+  return city;
 };
 
 export const getDestinationSuggestions = async (destinationId: string) => {
-  const destination = await prisma.destination.findUnique({
+  const city = await prisma.city.findUnique({
     where: { id: destinationId },
     select: {
       id: true,
@@ -144,50 +140,57 @@ export const getDestinationSuggestions = async (destinationId: string) => {
       activities: {
         select: {
           id: true,
-          title: true,
+          name: true,
           category: true,
           description: true,
           imageUrl: true,
-          estimatedPrice: true,
-          estimatedDurationHours: true,
-          rating: true,
-          isPopular: true,
+          estimatedCost: true,
+          durationMinutes: true,
+          popularityScore: true,
         },
-        orderBy: { rating: 'desc' },
+        orderBy: { popularityScore: 'desc' },
         take: 10,
       },
     },
   });
 
-  if (!destination) {
-    throw new Error('Destination not found');
+  if (!city) {
+    throw new Error('Destination city not found');
   }
 
   return {
     destination: {
-      id: destination.id,
-      name: destination.name,
-      country: destination.country,
-      region: destination.region,
-      imageUrl: destination.imageUrl,
+      id: city.id,
+      name: city.name,
+      country: city.country,
+      region: city.region,
+      imageUrl: city.imageUrl,
     },
-    suggestedActivities: destination.activities,
+    suggestedActivities: city.activities,
   };
 };
 
 export const createDestination = async (data: any) => {
-  return await prisma.destination.create({
-    data,
+  return await prisma.city.create({
+    data: {
+      name: data.name,
+      countryCode: data.countryCode || 'US',
+      country: data.country || null,
+      region: data.region || null,
+      description: data.description || null,
+      imageUrl: data.imageUrl || null,
+      popularityScore: data.popularityScore || 0.0,
+      costIndex: data.costIndex || null,
+    },
     select: {
       id: true,
       name: true,
       country: true,
+      countryCode: true,
       region: true,
       description: true,
       imageUrl: true,
-      bannerUrl: true,
-      isPopular: true,
-      rating: true,
+      popularityScore: true,
     },
   });
 };

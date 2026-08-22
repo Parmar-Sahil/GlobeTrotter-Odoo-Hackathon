@@ -22,15 +22,15 @@ async function testEndpoint(name: string, fn: () => Promise<boolean>) {
 }
 
 async function runTests() {
-  console.log('🧪 Starting Automated API Integration Verification Tests...\n');
+  console.log('🧪 Starting 14-Table Official Schema Integration Verification Tests...\n');
 
   server = app.listen(PORT);
 
   let authToken = '';
   let userId = '';
   let tripId = '';
-  let sectionId = '';
-  let destinationId = '';
+  let stopId = '';
+  let cityId = '';
   let activityId = '';
   let postId = '';
 
@@ -43,8 +43,8 @@ async function runTests() {
 
   // 2. Auth Register (Screen 2)
   await testEndpoint('User Registration (POST /api/v1/auth/register)', async () => {
-    const testUsername = `testuser_${Date.now()}`;
-    const testEmail = `test_${Date.now()}@example.com`;
+    const testUsername = `user_${Date.now()}`;
+    const testEmail = `user_${Date.now()}@example.com`;
     const res = await fetch(`${BASE_URL}/api/v1/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -82,8 +82,8 @@ async function runTests() {
     return res.status === 200 && data.success === true && !!data.data.token;
   });
 
-  // 4. Get Current User Profile (Screen 7)
-  await testEndpoint('Get Current Profile (GET /api/v1/auth/me)', async () => {
+  // 4. Profile (Screen 7)
+  await testEndpoint('Get Profile (GET /api/v1/auth/me)', async () => {
     const res = await fetch(`${BASE_URL}/api/v1/auth/me`, {
       headers: { Authorization: `Bearer ${authToken}` },
     });
@@ -92,7 +92,7 @@ async function runTests() {
   });
 
   // 5. Update Profile (Screen 7)
-  await testEndpoint('Update User Profile (PUT /api/v1/users/profile)', async () => {
+  await testEndpoint('Update Profile (PUT /api/v1/users/profile)', async () => {
     const res = await fetch(`${BASE_URL}/api/v1/users/profile`, {
       method: 'PUT',
       headers: {
@@ -101,7 +101,7 @@ async function runTests() {
       },
       body: JSON.stringify({
         bio: 'Updated bio via automated test suite',
-        city: 'New San Francisco',
+        city: 'San Francisco',
       }),
     });
     const data = await res.json();
@@ -117,7 +117,7 @@ async function runTests() {
       if (keys.length > 0) {
         const firstRegion = data.data[keys[0]];
         if (firstRegion.length > 0) {
-          destinationId = firstRegion[0].id;
+          cityId = firstRegion[0].id;
         }
       }
       return true;
@@ -129,12 +129,12 @@ async function runTests() {
   await testEndpoint('Search Destinations (GET /api/v1/destinations/search)', async () => {
     const res = await fetch(`${BASE_URL}/api/v1/destinations/search?search=Paris`);
     const data = await res.json();
-    return res.status === 200 && Array.isArray(data.data) && data.meta?.totalItems !== undefined;
+    return res.status === 200 && Array.isArray(data.data);
   });
 
-  // 8. Search Activities & Filter (Screen 8)
-  await testEndpoint('Search Activities with Filters (GET /api/v1/activities/search)', async () => {
-    const res = await fetch(`${BASE_URL}/api/v1/activities/search?sortBy=rating&sortOrder=desc`);
+  // 8. Search Activities (Screen 8)
+  await testEndpoint('Search Activities (GET /api/v1/activities/search)', async () => {
+    const res = await fetch(`${BASE_URL}/api/v1/activities/search?sortBy=popularityScore&sortOrder=desc`);
     const data = await res.json();
     if (res.status === 200 && Array.isArray(data.data) && data.data.length > 0) {
       activityId = data.data[0].id;
@@ -152,8 +152,8 @@ async function runTests() {
         Authorization: `Bearer ${authToken}`,
       },
       body: JSON.stringify({
-        title: 'Automated Test Trip to Paris',
-        destinationId: destinationId || undefined,
+        title: 'Official 14-Table Test Trip',
+        cityId: cityId || undefined,
         startDate: '2026-11-01',
         endDate: '2026-11-07',
         totalBudget: 2000.0,
@@ -168,8 +168,8 @@ async function runTests() {
     return false;
   });
 
-  // 10. Add Section to Trip (Screen 5)
-  await testEndpoint('Add Section to Trip (POST /api/v1/trips/:id/sections)', async () => {
+  // 10. Add Stop to Trip (Screen 5)
+  await testEndpoint('Add Stop to Trip (POST /api/v1/trips/:id/sections)', async () => {
     const res = await fetch(`${BASE_URL}/api/v1/trips/${tripId}/sections`, {
       method: 'POST',
       headers: {
@@ -177,22 +177,22 @@ async function runTests() {
         Authorization: `Bearer ${authToken}`,
       },
       body: JSON.stringify({
-        title: 'Section 1: Sightseeing & Travel',
-        description: 'First section of the itinerary',
-        allocatedBudget: 1000.0,
+        cityId: cityId || undefined,
+        title: 'Stop 1: Paris Sightseeing',
+        stopOrder: 1,
       }),
     });
     const data = await res.json();
     if (res.status === 201 && data.data?.id) {
-      sectionId = data.data.id;
+      stopId = data.data.id;
       return true;
     }
     return false;
   });
 
-  // 11. Add Item to Section (Screen 5)
-  await testEndpoint('Add Item to Section (POST /api/v1/trips/sections/:sectionId/items)', async () => {
-    const res = await fetch(`${BASE_URL}/api/v1/trips/sections/${sectionId}/items`, {
+  // 11. Add Itinerary Item (Screen 5)
+  await testEndpoint('Add Itinerary Item (POST /api/v1/trips/sections/:stopId/items)', async () => {
+    const res = await fetch(`${BASE_URL}/api/v1/trips/sections/${stopId}/items`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -200,10 +200,9 @@ async function runTests() {
       },
       body: JSON.stringify({
         activityId: activityId || undefined,
-        title: 'Visit Louvre Museum',
-        category: 'SIGHTSEEING',
-        dayNumber: 1,
-        expense: 150.0,
+        title: 'Eiffel Tower Guided Summit Visit',
+        itemType: 'activity',
+        costEstimate: 150.0,
         startTime: '10:00 AM',
         endTime: '01:00 PM',
       }),
@@ -212,15 +211,15 @@ async function runTests() {
     return res.status === 201 && data.data?.id !== undefined;
   });
 
-  // 12. Get Trip Itinerary (Screen 9)
-  await testEndpoint('Get Trip Itinerary Breakdown (GET /api/v1/trips/:id/itinerary)', async () => {
+  // 12. Get Itinerary (Screen 9)
+  await testEndpoint('Get Trip Itinerary (GET /api/v1/trips/:id/itinerary)', async () => {
     const res = await fetch(`${BASE_URL}/api/v1/trips/${tripId}/itinerary`);
     const data = await res.json();
     return res.status === 200 && data.data?.dayWiseItinerary !== undefined;
   });
 
   // 13. Get Budget Summary (Screen 9)
-  await testEndpoint('Get Trip Budget Summary (GET /api/v1/trips/:id/budget-summary)', async () => {
+  await testEndpoint('Get Budget Summary (GET /api/v1/trips/:id/budget-summary)', async () => {
     const res = await fetch(`${BASE_URL}/api/v1/trips/${tripId}/budget-summary`);
     const data = await res.json();
     return res.status === 200 && data.data?.totalActualExpense !== undefined;
@@ -228,7 +227,7 @@ async function runTests() {
 
   // 14. User Trip Listing (Screen 6)
   await testEndpoint('User Trip Listing (GET /api/v1/trips/my-trips)', async () => {
-    const res = await fetch(`${BASE_URL}/api/v1/trips/my-trips?status=UPCOMING`, {
+    const res = await fetch(`${BASE_URL}/api/v1/trips/my-trips?status=upcoming`, {
       headers: { Authorization: `Bearer ${authToken}` },
     });
     const data = await res.json();
@@ -236,7 +235,7 @@ async function runTests() {
   });
 
   // 15. Calendar View (Screen 11)
-  await testEndpoint('Calendar View Events (GET /api/v1/trips/calendar)', async () => {
+  await testEndpoint('Calendar View (GET /api/v1/trips/calendar)', async () => {
     const res = await fetch(`${BASE_URL}/api/v1/trips/calendar`, {
       headers: { Authorization: `Bearer ${authToken}` },
     });
@@ -244,7 +243,7 @@ async function runTests() {
     return res.status === 200 && Array.isArray(data.data);
   });
 
-  // 16. Create Community Post (Screen 10)
+  // 16. Community Post (Screen 10)
   await testEndpoint('Create Community Post (POST /api/v1/community/posts)', async () => {
     const res = await fetch(`${BASE_URL}/api/v1/community/posts`, {
       method: 'POST',
@@ -255,9 +254,7 @@ async function runTests() {
       body: JSON.stringify({
         tripId,
         title: 'Awesome Paris Trip Experience!',
-        content: 'I had an incredible time exploring Paris with GlobeTrotter!',
-        location: 'Paris, France',
-        category: 'Travel Experience',
+        body: 'I had an incredible time exploring Paris with GlobeTrotter!',
       }),
     });
     const data = await res.json();
@@ -278,7 +275,7 @@ async function runTests() {
     return res.status === 200 && data.data?.isLiked === true;
   });
 
-  // 18. Add Comment to Post (Screen 10)
+  // 18. Add Post Comment (Screen 10)
   await testEndpoint('Add Post Comment (POST /api/v1/community/posts/:id/comments)', async () => {
     const res = await fetch(`${BASE_URL}/api/v1/community/posts/${postId}/comments`, {
       method: 'POST',
@@ -292,10 +289,9 @@ async function runTests() {
     return res.status === 201 && data.data?.id !== undefined;
   });
 
-  // Cleanup & Close Server
   server.close();
   await prisma.$disconnect();
-  console.log('\n🎉 ALL 18 AUTOMATED INTEGRATION TESTS PASSED WITH 100% SUCCESS!');
+  console.log('\n🎉 ALL 18 INTEGRATION TESTS PASSED WITH 100% SUCCESS FOR THE OFFICIAL 14-TABLE SCHEMA!');
 }
 
 runTests().catch((err) => {

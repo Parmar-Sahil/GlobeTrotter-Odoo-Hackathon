@@ -1,45 +1,45 @@
 import { prisma } from '../../config/prisma.config';
 import { parsePagination, buildMeta } from '../../utils/pagination.util';
 import { Prisma } from '@prisma/client';
-import { ActivityCategory } from '../../types/enums';
 
 export const searchActivities = async (query: any) => {
   const { page, limit, skip } = parsePagination(query);
   const {
     search,
-    destinationId,
+    cityId,
     city,
     category,
     minPrice,
     maxPrice,
-    sortBy = 'rating',
+    sortBy = 'popularityScore',
     sortOrder = 'desc',
     groupBy,
   } = query;
 
-  const whereClause: Prisma.ActivityWhereInput = {};
+  const whereClause: Prisma.ActivityWhereInput = { isActive: true };
 
   if (search) {
     whereClause.OR = [
-      { title: { contains: search } },
+      { name: { contains: search } },
       { description: { contains: search } },
+      { address: { contains: search } },
     ];
   }
 
-  if (destinationId) {
-    whereClause.destinationId = destinationId;
+  if (cityId) {
+    whereClause.cityId = cityId;
   }
 
   if (city) {
-    whereClause.destination = { name: { contains: city } };
+    whereClause.city = { name: { contains: city } };
   }
 
   if (category) {
-    whereClause.category = category as ActivityCategory;
+    whereClause.category = category;
   }
 
   if (minPrice || maxPrice) {
-    whereClause.estimatedPrice = {
+    whereClause.estimatedCost = {
       ...(minPrice && { gte: parseFloat(minPrice) }),
       ...(maxPrice && { lte: parseFloat(maxPrice) }),
     };
@@ -52,16 +52,16 @@ export const searchActivities = async (query: any) => {
       where: whereClause,
       select: {
         id: true,
-        title: true,
+        name: true,
         category: true,
         description: true,
         imageUrl: true,
-        estimatedPrice: true,
-        estimatedDurationHours: true,
-        rating: true,
-        isPopular: true,
-        locationAddress: true,
-        destination: {
+        estimatedCost: true,
+        currency: true,
+        durationMinutes: true,
+        popularityScore: true,
+        address: true,
+        city: {
           select: { id: true, name: true, country: true },
         },
       },
@@ -72,7 +72,6 @@ export const searchActivities = async (query: any) => {
     prisma.activity.count({ where: whereClause }),
   ]);
 
-  // Handle in-memory grouping if requested (e.g., group by category or city)
   let groupedData: Record<string, typeof activities> | null = null;
   if (groupBy === 'category') {
     groupedData = activities.reduce((acc, act) => {
@@ -83,7 +82,7 @@ export const searchActivities = async (query: any) => {
     }, {} as Record<string, typeof activities>);
   } else if (groupBy === 'city') {
     groupedData = activities.reduce((acc, act) => {
-      const key = act.destination.name;
+      const key = act.city.name;
       if (!acc[key]) acc[key] = [];
       acc[key].push(act);
       return acc;
@@ -104,16 +103,16 @@ export const getActivityById = async (id: string) => {
     where: { id },
     select: {
       id: true,
-      title: true,
+      name: true,
       category: true,
       description: true,
       imageUrl: true,
-      estimatedPrice: true,
-      estimatedDurationHours: true,
-      rating: true,
-      isPopular: true,
-      locationAddress: true,
-      destination: {
+      estimatedCost: true,
+      currency: true,
+      durationMinutes: true,
+      popularityScore: true,
+      address: true,
+      city: {
         select: { id: true, name: true, country: true, imageUrl: true },
       },
     },
@@ -128,17 +127,27 @@ export const getActivityById = async (id: string) => {
 
 export const createActivity = async (data: any) => {
   return await prisma.activity.create({
-    data,
+    data: {
+      cityId: data.cityId || data.destinationId,
+      name: data.name || data.title,
+      category: data.category || 'activity',
+      description: data.description || null,
+      imageUrl: data.imageUrl || null,
+      estimatedCost: data.estimatedCost || data.estimatedPrice || 0.0,
+      currency: data.currency || 'USD',
+      durationMinutes: data.durationMinutes || (data.estimatedDurationHours ? data.estimatedDurationHours * 60 : 60),
+      address: data.address || data.locationAddress || null,
+      popularityScore: data.popularityScore || 0.0,
+    },
     select: {
       id: true,
-      title: true,
+      name: true,
       category: true,
       description: true,
       imageUrl: true,
-      estimatedPrice: true,
-      estimatedDurationHours: true,
-      rating: true,
-      isPopular: true,
+      estimatedCost: true,
+      durationMinutes: true,
+      popularityScore: true,
     },
   });
 };
