@@ -8,10 +8,14 @@ export const updateUserProfile = async (
     firstName?: string;
     lastName?: string;
     avatarUrl?: string;
+    profilePhotoUrl?: string;
     phoneNumber?: string;
+    phone?: string;
     city?: string;
     country?: string;
     bio?: string;
+    language?: string;
+    currency?: string;
   }
 ) => {
   return await prisma.user.update({
@@ -19,11 +23,17 @@ export const updateUserProfile = async (
     data: {
       ...(data.firstName && { firstName: data.firstName }),
       ...(data.lastName && { lastName: data.lastName }),
-      ...(data.avatarUrl !== undefined && { avatarUrl: data.avatarUrl || null }),
-      ...(data.phoneNumber !== undefined && { phoneNumber: data.phoneNumber || null }),
+      ...(data.profilePhotoUrl !== undefined || data.avatarUrl !== undefined
+        ? { profilePhotoUrl: data.profilePhotoUrl || data.avatarUrl || null }
+        : {}),
+      ...(data.phone !== undefined || data.phoneNumber !== undefined
+        ? { phone: data.phone || data.phoneNumber || null }
+        : {}),
       ...(data.city !== undefined && { city: data.city || null }),
       ...(data.country !== undefined && { country: data.country || null }),
       ...(data.bio !== undefined && { bio: data.bio || null }),
+      ...(data.language && { language: data.language }),
+      ...(data.currency && { currency: data.currency }),
     },
     select: {
       id: true,
@@ -31,11 +41,13 @@ export const updateUserProfile = async (
       firstName: true,
       lastName: true,
       username: true,
-      avatarUrl: true,
-      phoneNumber: true,
+      profilePhotoUrl: true,
+      phone: true,
       city: true,
       country: true,
       bio: true,
+      language: true,
+      currency: true,
       role: true,
       updatedAt: true,
     },
@@ -46,8 +58,8 @@ export const getUserPreplannedTrips = async (query: any) => {
   const { page, limit, skip } = parsePagination(query);
 
   const whereClause = {
-    isPreplanned: true,
-    isPublic: true,
+    visibility: 'public',
+    deletedAt: null,
   };
 
   const [trips, totalItems] = await Promise.all([
@@ -55,16 +67,22 @@ export const getUserPreplannedTrips = async (query: any) => {
       where: whereClause,
       select: {
         id: true,
-        title: true,
-        coverImage: true,
+        name: true,
+        coverPhotoUrl: true,
         startDate: true,
         endDate: true,
         totalBudget: true,
-        destination: {
-          select: { id: true, name: true, country: true, imageUrl: true },
+        currency: true,
+        stops: {
+          select: {
+            city: {
+              select: { id: true, name: true, country: true, imageUrl: true },
+            },
+          },
+          take: 1,
         },
         _count: {
-          select: { sections: true },
+          select: { stops: true, itineraryItems: true },
         },
       },
       orderBy: { createdAt: 'desc' },
@@ -84,6 +102,7 @@ export const getUserPreviousTrips = async (userId: string, query: any) => {
   const whereClause = {
     userId,
     status: TripStatus.COMPLETED,
+    deletedAt: null,
   };
 
   const [trips, totalItems] = await Promise.all([
@@ -91,17 +110,23 @@ export const getUserPreviousTrips = async (userId: string, query: any) => {
       where: whereClause,
       select: {
         id: true,
-        title: true,
-        coverImage: true,
+        name: true,
+        coverPhotoUrl: true,
         startDate: true,
         endDate: true,
         totalBudget: true,
+        currency: true,
         status: true,
-        destination: {
-          select: { id: true, name: true, country: true, imageUrl: true },
+        stops: {
+          select: {
+            city: {
+              select: { id: true, name: true, country: true, imageUrl: true },
+            },
+          },
+          take: 1,
         },
         _count: {
-          select: { sections: true },
+          select: { stops: true, itineraryItems: true },
         },
       },
       orderBy: { endDate: 'desc' },

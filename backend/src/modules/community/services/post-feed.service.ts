@@ -1,40 +1,49 @@
 import { prisma } from '../../../config/prisma.config';
 import { parsePagination, buildMeta } from '../../../utils/pagination.util';
 import { Prisma } from '@prisma/client';
+import { PostStatus } from '../../../types/enums';
 
 export const createPost = async (
   userId: string,
   data: {
     tripId?: string;
-    title: string;
-    content: string;
+    activityId?: string;
+    cityId?: string;
+    title?: string;
+    content?: string;
+    body?: string;
     imageUrl?: string;
+    imageUrls?: string[];
+    tags?: string[];
     location?: string;
     category?: string;
   }
 ) => {
+  const images = data.imageUrls || (data.imageUrl ? [data.imageUrl] : []);
+  const tagsList = data.tags || (data.category ? [data.category] : []);
+
   return await prisma.communityPost.create({
     data: {
       userId,
       tripId: data.tripId || null,
-      title: data.title,
-      content: data.content,
-      imageUrl: data.imageUrl || null,
-      location: data.location || null,
-      category: data.category || 'Travel Experience',
+      activityId: data.activityId || null,
+      cityId: data.cityId || null,
+      title: data.title || null,
+      body: data.body || data.content || '',
+      imageUrls: JSON.stringify(images),
+      tags: JSON.stringify(tagsList),
+      status: PostStatus.PUBLISHED,
     },
     select: {
       id: true,
       title: true,
-      content: true,
-      imageUrl: true,
-      location: true,
-      category: true,
-      likesCount: true,
-      viewsCount: true,
+      body: true,
+      imageUrls: true,
+      tags: true,
+      status: true,
       createdAt: true,
       user: {
-        select: { id: true, firstName: true, lastName: true, username: true, avatarUrl: true },
+        select: { id: true, firstName: true, lastName: true, username: true, profilePhotoUrl: true },
       },
     },
   });
@@ -44,18 +53,17 @@ export const getPostsFeed = async (query: any, currentUserId?: string) => {
   const { page, limit, skip } = parsePagination(query);
   const { search, category, groupBy, sortBy = 'createdAt', sortOrder = 'desc' } = query;
 
-  const whereClause: Prisma.CommunityPostWhereInput = {};
+  const whereClause: Prisma.CommunityPostWhereInput = {
+    status: PostStatus.PUBLISHED,
+    deletedAt: null,
+  };
 
   if (search) {
     whereClause.OR = [
       { title: { contains: search } },
-      { content: { contains: search } },
-      { location: { contains: search } },
+      { body: { contains: search } },
+      { tags: { contains: search } },
     ];
-  }
-
-  if (category) {
-    whereClause.category = { equals: category };
   }
 
   const orderBy = { [sortBy]: sortOrder };
@@ -66,15 +74,16 @@ export const getPostsFeed = async (query: any, currentUserId?: string) => {
       select: {
         id: true,
         title: true,
-        content: true,
-        imageUrl: true,
-        location: true,
-        category: true,
-        likesCount: true,
-        viewsCount: true,
+        body: true,
+        imageUrls: true,
+        tags: true,
+        status: true,
         createdAt: true,
         user: {
-          select: { id: true, firstName: true, lastName: true, username: true, avatarUrl: true },
+          select: { id: true, firstName: true, lastName: true, username: true, profilePhotoUrl: true },
+        },
+        city: {
+          select: { id: true, name: true, country: true },
         },
         _count: {
           select: { comments: true, likes: true },
@@ -87,11 +96,10 @@ export const getPostsFeed = async (query: any, currentUserId?: string) => {
     prisma.communityPost.count({ where: whereClause }),
   ]);
 
-  // Bulk check if current user liked these posts (Rule 2: zero DB queries in loops)
   let userLikedPostIdsSet = new Set<string>();
   if (currentUserId && posts.length > 0) {
     const postIds = posts.map((p) => p.id);
-    const userLikes = await prisma.postLike.findMany({
+    const userLikes = await prisma.communityPostLike.findMany({
       where: {
         userId: currentUserId,
         postId: { in: postIds },
@@ -103,32 +111,16 @@ export const getPostsFeed = async (query: any, currentUserId?: string) => {
 
   const formattedPosts = posts.map((post) => ({
     ...post,
+    likesCount: post._count.likes,
+    commentsCount: post._count.comments,
     isLiked: userLikedPostIdsSet.has(post.id),
   }));
-
-  // Handle in-memory grouping if requested
-  let groupedData: Record<string, typeof formattedPosts> | null = null;
-  if (groupBy === 'category') {
-    groupedData = formattedPosts.reduce((acc, p) => {
-      const key = p.category || 'General';
-      if (!acc[key]) acc[key] = [];
-      acc[key].push(p);
-      return acc;
-    }, {} as Record<string, typeof formattedPosts>);
-  } else if (groupBy === 'location') {
-    groupedData = formattedPosts.reduce((acc, p) => {
-      const key = p.location || 'Unknown Location';
-      if (!acc[key]) acc[key] = [];
-      acc[key].push(p);
-      return acc;
-    }, {} as Record<string, typeof formattedPosts>);
-  }
 
   const meta = buildMeta(totalItems, page, limit);
 
   return {
-    posts: groupedData || formattedPosts,
-    isGrouped: !!groupedData,
+    posts: formattedPosts,
+    isGrouped: false,
     meta,
   };
 };
@@ -139,21 +131,19 @@ export const getPostById = async (postId: string, currentUserId?: string) => {
     select: {
       id: true,
       title: true,
-      content: true,
-      imageUrl: true,
-      location: true,
-      category: true,
-      likesCount: true,
-      viewsCount: true,
+      body: true,
+      imageUrls: true,
+      tags: true,
+      status: true,
       createdAt: true,
       user: {
-        select: { id: true, firstName: true, lastName: true, username: true, avatarUrl: true },
+        select: { id: true, firstName: true, lastName: true, username: true, profilePhotoUrl: true },
       },
       trip: {
-        select: { id: true, title: true, startDate: true, endDate: true },
+        select: { id: true, name: true, startDate: true, endDate: true },
       },
       _count: {
-        select: { comments: true },
+        select: { comments: true, likes: true },
       },
     },
   });
@@ -164,18 +154,12 @@ export const getPostById = async (postId: string, currentUserId?: string) => {
 
   let isLiked = false;
   if (currentUserId) {
-    const like = await prisma.postLike.findUnique({
+    const like = await prisma.communityPostLike.findUnique({
       where: { postId_userId: { postId, userId: currentUserId } },
-      select: { id: true },
+      select: { postId: true },
     });
     isLiked = !!like;
   }
 
-  // Non-blocking view count update
-  prisma.communityPost.update({
-    where: { id: postId },
-    data: { viewsCount: { increment: 1 } },
-  }).catch((err) => console.error('Failed to update post viewsCount:', err));
-
-  return { ...post, isLiked };
+  return { ...post, likesCount: post._count.likes, isLiked };
 };

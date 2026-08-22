@@ -1,12 +1,13 @@
 import { prisma } from '../../config/prisma.config';
 import { parsePagination, buildMeta } from '../../utils/pagination.util';
 import { Prisma } from '@prisma/client';
+import { UserRole } from '../../types/enums';
 
 export const getUsersList = async (query: any) => {
   const { page, limit, skip } = parsePagination(query);
-  const { search, role, isActive } = query;
+  const { search, role, status } = query;
 
-  const whereClause: Prisma.UserWhereInput = {};
+  const whereClause: Prisma.UserWhereInput = { deletedAt: null };
 
   if (search) {
     whereClause.OR = [
@@ -21,8 +22,8 @@ export const getUsersList = async (query: any) => {
     whereClause.role = role;
   }
 
-  if (isActive !== undefined) {
-    whereClause.isActive = isActive === 'true';
+  if (status) {
+    whereClause.status = status;
   }
 
   const [users, totalItems] = await Promise.all([
@@ -34,11 +35,11 @@ export const getUsersList = async (query: any) => {
         firstName: true,
         lastName: true,
         username: true,
-        avatarUrl: true,
+        profilePhotoUrl: true,
         city: true,
         country: true,
         role: true,
-        isActive: true,
+        status: true,
         createdAt: true,
         _count: {
           select: { trips: true, communityPosts: true },
@@ -55,7 +56,7 @@ export const getUsersList = async (query: any) => {
   return { users, meta };
 };
 
-export const updateUserStatus = async (userId: string, data: { isActive?: boolean; role?: 'USER' | 'ADMIN' }) => {
+export const updateUserStatus = async (userId: string, data: { status?: string; role?: string }) => {
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { id: true },
@@ -68,7 +69,7 @@ export const updateUserStatus = async (userId: string, data: { isActive?: boolea
   return await prisma.user.update({
     where: { id: userId },
     data: {
-      ...(data.isActive !== undefined && { isActive: data.isActive }),
+      ...(data.status && { status: data.status }),
       ...(data.role && { role: data.role }),
     },
     select: {
@@ -76,30 +77,29 @@ export const updateUserStatus = async (userId: string, data: { isActive?: boolea
       email: true,
       username: true,
       role: true,
-      isActive: true,
+      status: true,
       updatedAt: true,
     },
   });
 };
 
 export const getPopularCitiesAnalytics = async () => {
-  // Fetch popular cities ranked by trip counts and visit counts
-  const popularCities = await prisma.destination.findMany({
+  const popularCities = await prisma.city.findMany({
     select: {
       id: true,
       name: true,
       country: true,
       region: true,
       imageUrl: true,
-      visitCount: true,
-      rating: true,
+      popularityScore: true,
+      costIndex: true,
       _count: {
-        select: { trips: true, activities: true },
+        select: { tripStops: true, activities: true },
       },
     },
     orderBy: [
-      { trips: { _count: 'desc' } },
-      { visitCount: 'desc' },
+      { popularityScore: 'desc' },
+      { tripStops: { _count: 'desc' } },
     ],
     take: 10,
   });
@@ -109,10 +109,9 @@ export const getPopularCitiesAnalytics = async () => {
     cityName: city.name,
     country: city.country,
     region: city.region,
-    visitCount: city.visitCount,
-    tripsPlannedCount: city._count.trips,
+    popularityScore: city.popularityScore,
+    tripsPlannedCount: city._count.tripStops,
     activitiesCount: city._count.activities,
-    rating: city.rating,
   }));
 };
 
@@ -120,47 +119,47 @@ export const getPopularActivitiesAnalytics = async () => {
   const popularActivities = await prisma.activity.findMany({
     select: {
       id: true,
-      title: true,
+      name: true,
       category: true,
-      estimatedPrice: true,
-      rating: true,
-      destination: {
+      estimatedCost: true,
+      popularityScore: true,
+      city: {
         select: { name: true, country: true },
       },
       _count: {
-        select: { tripItems: true },
+        select: { itineraryItems: true },
       },
     },
     orderBy: [
-      { tripItems: { _count: 'desc' } },
-      { rating: 'desc' },
+      { popularityScore: 'desc' },
+      { itineraryItems: { _count: 'desc' } },
     ],
     take: 10,
   });
 
   return popularActivities.map((act) => ({
     id: act.id,
-    title: act.title,
+    title: act.name,
     category: act.category,
-    cityName: act.destination.name,
-    estimatedPrice: act.estimatedPrice,
-    rating: act.rating,
-    timesAddedToItineraries: act._count.tripItems,
+    cityName: act.city.name,
+    estimatedCost: act.estimatedCost,
+    popularityScore: act.popularityScore,
+    timesAddedToItineraries: act._count.itineraryItems,
   }));
 };
 
 export const getUserTrendsAnalytics = async () => {
-  const [totalUsers, totalTrips, totalDestinations, totalActivities, totalPosts] = await Promise.all([
-    prisma.user.count(),
-    prisma.trip.count(),
-    prisma.destination.count(),
+  const [totalUsers, totalTrips, totalCities, totalActivities, totalPosts] = await Promise.all([
+    prisma.user.count({ where: { deletedAt: null } }),
+    prisma.trip.count({ where: { deletedAt: null } }),
+    prisma.city.count(),
     prisma.activity.count(),
-    prisma.communityPost.count(),
+    prisma.communityPost.count({ where: { deletedAt: null } }),
   ]);
 
-  // Group trips by status efficiently
   const tripStatusCounts = await prisma.trip.groupBy({
     by: ['status'],
+    where: { deletedAt: null },
     _count: { id: true },
   });
 
@@ -173,16 +172,16 @@ export const getUserTrendsAnalytics = async () => {
     overview: {
       totalUsers,
       totalTrips,
-      totalDestinations,
+      totalCities,
       totalActivities,
       totalPosts,
     },
     tripBreakdown: {
-      upcoming: statusMap['UPCOMING'] || 0,
-      ongoing: statusMap['ONGOING'] || 0,
-      completed: statusMap['COMPLETED'] || 0,
-      draft: statusMap['DRAFT'] || 0,
-      cancelled: statusMap['CANCELLED'] || 0,
+      upcoming: statusMap['upcoming'] || 0,
+      ongoing: statusMap['ongoing'] || 0,
+      completed: statusMap['completed'] || 0,
+      draft: statusMap['draft'] || 0,
+      archived: statusMap['archived'] || 0,
     },
   };
 };

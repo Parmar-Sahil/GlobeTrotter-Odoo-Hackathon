@@ -34,7 +34,6 @@ app.get('/api/health', (req: Request, res: Response) => {
   return sendSuccess(res, { timestamp: new Date().toISOString() }, 'GlobeTrotter API is running');
 });
 
-// API Routes
 app.use('/api/auth', authRouter);
 app.use('/api/users', userRouter);
 app.use('/api/destinations', destinationRouter);

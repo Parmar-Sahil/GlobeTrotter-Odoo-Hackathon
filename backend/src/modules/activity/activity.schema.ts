@@ -9,7 +9,7 @@ export const searchActivitySchema = z.object({
     category: z.nativeEnum(ActivityCategory).optional(),
     minPrice: z.string().optional(),
     maxPrice: z.string().optional(),
-    sortBy: z.enum(['estimatedPrice', 'rating', 'estimatedDurationHours', 'title', 'createdAt']).optional(),
+    sortBy: z.enum(['popularityScore', 'estimatedCost', 'durationMinutes', 'name', 'createdAt', 'estimatedPrice', 'rating', 'estimatedDurationHours', 'title']).optional(),
     sortOrder: z.enum(['asc', 'desc']).optional(),
     groupBy: z.enum(['category', 'city']).optional(),
     page: z.string().optional(),

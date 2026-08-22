@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { prisma } from '../../config/prisma.config';
 import { env } from '../../config/env.config';
 import { JwtPayload } from '../../types';
+import { UserRole, UserStatus } from '../../types/enums';
 
 export const registerUser = async (data: {
   email: string;
@@ -11,7 +12,9 @@ export const registerUser = async (data: {
   lastName: string;
   username: string;
   avatarUrl?: string;
+  profilePhotoUrl?: string;
   phoneNumber?: string;
+  phone?: string;
   city?: string;
   country?: string;
   bio?: string;
@@ -36,15 +39,17 @@ export const registerUser = async (data: {
   const user = await prisma.user.create({
     data: {
       email: data.email,
+      username: data.username,
       passwordHash,
       firstName: data.firstName,
       lastName: data.lastName,
-      username: data.username,
-      avatarUrl: data.avatarUrl || null,
-      phoneNumber: data.phoneNumber || null,
+      profilePhotoUrl: data.profilePhotoUrl || data.avatarUrl || null,
+      phone: data.phone || data.phoneNumber || null,
       city: data.city || null,
       country: data.country || null,
       bio: data.bio || null,
+      role: UserRole.USER,
+      status: UserStatus.ACTIVE,
     },
     select: {
       id: true,
@@ -52,12 +57,13 @@ export const registerUser = async (data: {
       firstName: true,
       lastName: true,
       username: true,
-      avatarUrl: true,
-      phoneNumber: true,
+      profilePhotoUrl: true,
+      phone: true,
       city: true,
       country: true,
       bio: true,
       role: true,
+      status: true,
       createdAt: true,
     },
   });
@@ -87,24 +93,30 @@ export const loginUser = async (usernameOrEmail: string, password: string) => {
       firstName: true,
       lastName: true,
       username: true,
-      avatarUrl: true,
-      phoneNumber: true,
+      profilePhotoUrl: true,
+      phone: true,
       city: true,
       country: true,
       bio: true,
       role: true,
-      isActive: true,
+      status: true,
     },
   });
 
-  if (!user || !user.isActive) {
-    throw new Error('Invalid credentials');
+  if (!user || user.status !== UserStatus.ACTIVE) {
+    throw new Error('Invalid credentials or account suspended');
   }
 
   const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
   if (!isPasswordValid) {
     throw new Error('Invalid credentials');
   }
+
+  // Asynchronously update lastLoginAt
+  prisma.user.update({
+    where: { id: user.id },
+    data: { lastLoginAt: new Date() },
+  }).catch((err) => console.error('Failed to update lastLoginAt:', err));
 
   const payload: JwtPayload = {
     userId: user.id,
@@ -116,7 +128,6 @@ export const loginUser = async (usernameOrEmail: string, password: string) => {
     expiresIn: env.JWT_EXPIRES_IN as any,
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { passwordHash, ...userWithoutPassword } = user;
 
   return { user: userWithoutPassword, token };
@@ -131,17 +142,22 @@ export const getCurrentUserProfile = async (userId: string) => {
       firstName: true,
       lastName: true,
       username: true,
-      avatarUrl: true,
-      phoneNumber: true,
+      profilePhotoUrl: true,
+      phone: true,
       city: true,
       country: true,
+      countryCode: true,
       bio: true,
+      language: true,
+      currency: true,
       role: true,
+      status: true,
       createdAt: true,
       _count: {
         select: {
           trips: true,
           communityPosts: true,
+          savedDestinations: true,
         },
       },
     },
