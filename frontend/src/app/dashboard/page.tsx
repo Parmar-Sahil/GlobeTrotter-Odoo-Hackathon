@@ -4,9 +4,12 @@ import React from "react";
 import Link from "next/link";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import { ContinuePlanning } from "@/components/dashboard/ContinuePlanning";
 import { UpcomingTripCard } from "@/components/dashboard/UpcomingTripCard";
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { DestinationCard } from "@/components/dashboard/DestinationCard";
+import { ExperienceDiscovery } from "@/components/dashboard/ExperienceDiscovery";
+import { TravelInspiration } from "@/components/dashboard/TravelInspiration";
 import { EmptyTripsState } from "@/components/trips/EmptyTripsState";
 import {
   TripCardSkeleton,
@@ -15,17 +18,20 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 import { useMyTrips } from "@/hooks/use-trips";
 import { useTopRegionalDestinations } from "@/hooks/use-destinations";
+import { useSearchActivities } from "@/hooks/use-activities";
 import {
   MapPin,
   Sparkles,
   ArrowRight,
-  Plus,
   RefreshCw,
   AlertCircle,
+  Compass,
 } from "lucide-react";
 
 export default function DashboardPage() {
   const { user } = useAuth();
+
+  // 1. Real Trips API
   const {
     data: tripsData,
     isLoading: tripsLoading,
@@ -33,19 +39,33 @@ export default function DashboardPage() {
     refetch: refetchTrips,
   } = useMyTrips();
 
+  // 2. Real Destinations API
   const {
     data: destinations,
     isLoading: destinationsLoading,
+    isError: destinationsError,
+    refetch: refetchDestinations,
   } = useTopRegionalDestinations();
 
+  // 3. Real Activities API
+  const {
+    data: activitiesData,
+    isLoading: activitiesLoading,
+  } = useSearchActivities({ limit: 6 });
+
   const trips = tripsData?.trips || [];
+  
+  // Find draft/planning trip for "Continue Planning"
+  const draftTrip = trips.find((t) => t.status === "PLANNING");
+
+  // Upcoming confirmed trips
   const upcomingTrips = trips.filter(
     (t) => t.status === "PLANNING" || t.status === "ONGOING"
   );
   const primaryUpcomingTrip = upcomingTrips[0] || trips[0];
   const otherUpcomingTrips = upcomingTrips.slice(1, 3);
 
-  // Fallback presentation destinations if API is loading or empty
+  // Fallback presentation destinations if API response is empty
   const fallbackDestinations = [
     {
       id: "dest-kyoto",
@@ -100,21 +120,28 @@ export default function DashboardPage() {
 
   return (
     <AppLayout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
-        {/* 1. Personalized Header */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12 animate-in fade-in duration-300">
+        {/* 1. Personalized Header with Time-of-Day Greeting and Primary CTA */}
         <DashboardHeader user={user} tripCount={trips.length} />
 
-        {/* 2. Upcoming Trips Section */}
+        {/* 2. Continue Planning (Only rendered when a draft trip exists) */}
+        {draftTrip && (
+          <section className="space-y-4">
+            <ContinuePlanning trip={draftTrip} />
+          </section>
+        )}
+
+        {/* 3. Upcoming Trips Section */}
         <section className="space-y-5">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <MapPin className="w-5 h-5 text-[#F95724]" />
                 <h2 className="text-xl font-extrabold text-slate-900">
-                  Upcoming Trips
+                  Your Upcoming Trips
                 </h2>
               </div>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-500 font-normal">
                 Your planned itineraries and upcoming travel schedules
               </p>
             </div>
@@ -136,14 +163,14 @@ export default function DashboardPage() {
             </div>
           ) : tripsError ? (
             <div className="p-6 rounded-3xl bg-rose-50 border border-rose-200 text-center space-y-3">
-              <div className="flex items-center justify-center gap-2 text-rose-700 font-bold text-sm">
+              <div className="flex items-center justify-center gap-2 text-rose-700 font-bold text-xs sm:text-sm">
                 <AlertCircle className="w-4 h-4" />
                 <span>Couldn&apos;t load your trips.</span>
               </div>
               <button
                 type="button"
                 onClick={() => refetchTrips()}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white border border-rose-300 text-rose-700 text-xs font-bold hover:bg-rose-100/50 shadow-2xs"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white border border-rose-300 text-rose-700 text-xs font-bold hover:bg-rose-100/50 shadow-2xs transition-colors"
               >
                 <RefreshCw className="w-3.5 h-3.5" /> Try Again
               </button>
@@ -164,7 +191,7 @@ export default function DashboardPage() {
                         <span className="text-[10px] font-bold uppercase tracking-wider text-[#F95724] bg-orange-50 px-2.5 py-0.5 rounded-md">
                           Upcoming
                         </span>
-                        <h4 className="text-base font-bold text-slate-900 truncate">
+                        <h4 className="text-base font-extrabold text-slate-900 truncate">
                           {otherTrip.title}
                         </h4>
                         <p className="text-xs text-slate-400">
@@ -182,7 +209,7 @@ export default function DashboardPage() {
 
                       <Link
                         href={`/trips/${otherTrip.id}`}
-                        className="inline-flex items-center gap-1 px-4 py-2 rounded-full bg-[#7C2D12] text-white text-xs font-bold hover:bg-[#9A3412] shrink-0"
+                        className="inline-flex items-center gap-1 px-4 py-2 rounded-full bg-[#7C2D12] text-white text-xs font-bold hover:bg-[#9A3412] shrink-0 transition-colors"
                       >
                         View <ArrowRight className="w-3 h-3" />
                       </Link>
@@ -196,21 +223,21 @@ export default function DashboardPage() {
           )}
         </section>
 
-        {/* 3. Quick Actions */}
+        {/* 4. Quick Actions */}
         <QuickActions />
 
-        {/* 4. Popular Destinations */}
+        {/* 5. Popular Destinations ("Places worth going.") */}
         <section className="space-y-5 pt-2">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-[#F95724]" />
+                <Compass className="w-5 h-5 text-[#F95724]" />
                 <h2 className="text-xl font-extrabold text-slate-900">
-                  Popular Destinations
+                  Places worth going.
                 </h2>
               </div>
-              <p className="text-xs text-slate-500">
-                Trending cities and curated regions for your next journey
+              <p className="text-xs text-slate-500 font-normal">
+                Trending cities, cultural capitals and curated regional spots
               </p>
             </div>
 
@@ -229,6 +256,19 @@ export default function DashboardPage() {
                 <DestinationCardSkeleton key={i} />
               ))}
             </div>
+          ) : destinationsError ? (
+            <div className="p-6 rounded-3xl bg-orange-50/50 border border-orange-100 text-center space-y-2">
+              <p className="text-xs text-slate-600 font-medium">
+                Destinations couldn&apos;t be loaded right now.
+              </p>
+              <button
+                type="button"
+                onClick={() => refetchDestinations()}
+                className="px-4 py-1.5 rounded-full bg-white border border-orange-200 text-xs font-bold text-[#7C2D12] hover:bg-orange-50 shadow-2xs"
+              >
+                Retry
+              </button>
+            </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {displayDestinations.map((dest) => (
@@ -237,6 +277,15 @@ export default function DashboardPage() {
             </div>
           )}
         </section>
+
+        {/* 6. Experiences / Activities ("Make the journey memorable.") */}
+        <ExperienceDiscovery
+          activities={activitiesData?.activities}
+          isLoading={activitiesLoading}
+        />
+
+        {/* 7. Travel Inspiration */}
+        <TravelInspiration />
       </div>
     </AppLayout>
   );

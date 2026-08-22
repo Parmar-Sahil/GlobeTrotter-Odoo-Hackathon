@@ -25,9 +25,10 @@ export function Navbar() {
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
 
   const navLinks = [
-    { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    { name: "My Trips", href: "/trips", icon: MapPin },
+    { name: "Home", href: "/dashboard", icon: LayoutDashboard },
     { name: "Explore", href: "/explore", icon: Compass },
+    { name: "Discover", href: "/explore?tab=discover", icon: Sparkles },
+    { name: "My Trips", href: "/trips", icon: MapPin },
   ];
 
   const handleLogout = () => {

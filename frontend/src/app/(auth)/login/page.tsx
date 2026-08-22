@@ -36,7 +36,7 @@ export default function LoginPage() {
         usernameOrEmail: data.email,
         password: data.password,
       });
-      router.push("/");
+      router.push("/dashboard");
     } catch (err: any) {
       const rawMsg = err.response?.data?.message || err.message || "";
       if (rawMsg.includes("Can't reach database server") || rawMsg.includes("localhost:5432")) {
