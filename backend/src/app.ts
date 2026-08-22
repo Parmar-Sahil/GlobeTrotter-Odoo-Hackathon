@@ -34,14 +34,14 @@ app.get('/api/health', (req: Request, res: Response) => {
   return sendSuccess(res, { timestamp: new Date().toISOString() }, 'GlobeTrotter API is running');
 });
 
-// API Routes (v1)
-app.use('/api/v1/auth', authRouter);
-app.use('/api/v1/users', userRouter);
-app.use('/api/v1/destinations', destinationRouter);
-app.use('/api/v1/activities', activityRouter);
-app.use('/api/v1/trips', tripRouter);
-app.use('/api/v1/community', communityRouter);
-app.use('/api/v1/admin', adminRouter);
+// API Routes
+app.use('/api/auth', authRouter);
+app.use('/api/users', userRouter);
+app.use('/api/destinations', destinationRouter);
+app.use('/api/activities', activityRouter);
+app.use('/api/trips', tripRouter);
+app.use('/api/community', communityRouter);
+app.use('/api/admin', adminRouter);
 
 // 404 Route Handler
 app.use((req: Request, res: Response) => {
