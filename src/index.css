@@ -1,0 +1,81 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-primary: #FAFAFA;
+    --text-primary: #0F172A;
+    --card-bg: #FFFFFF;
+    --border-color: #E2E8F0;
+  }
+
+  .dark {
+    --bg-primary: #0B0F17;
+    --text-primary: #F8FAFC;
+    --card-bg: #111827;
+    --border-color: #1F2937;
+  }
+
+  body {
+    @apply font-sans antialiased transition-colors duration-200;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+  }
+}
+
+/* Clean Airbnb-style Cards & Panels */
+.clean-card {
+  @apply bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-sm transition-all duration-200;
+}
+
+.clean-card-hover {
+  @apply hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-200;
+}
+
+/* Glass & Header Nav */
+.clean-nav {
+  @apply bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800;
+}
+
+/* Brand Button styling */
+.btn-primary {
+  @apply bg-rose-500 hover:bg-rose-600 active:scale-95 text-white font-bold text-sm px-4 py-2.5 rounded-xl shadow-sm transition-all;
+}
+
+.btn-secondary {
+  @apply bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold text-sm px-4 py-2.5 rounded-xl transition-all border border-slate-200/60 dark:border-slate-700/60;
+}
+
+/* Refined Subtle Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 9999px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Clean Mascot subtle animation */
+@keyframes soft-float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.animate-globi-soft {
+  animation: soft-float 3.5s ease-in-out infinite;
+}
