@@ -8,7 +8,7 @@
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:5000/api/v1",
+      "value": "http://localhost:5000/api",
       "type": "string"
     },
     {
@@ -46,7 +46,10 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -54,8 +57,13 @@
             },
             "url": {
               "raw": "{{baseUrl}}/auth/register",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "register"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
             }
           }
         },
@@ -64,7 +72,10 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -72,8 +83,13 @@
             },
             "url": {
               "raw": "{{baseUrl}}/auth/login",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "login"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
             }
           }
         },
@@ -82,12 +98,20 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
             ],
             "url": {
               "raw": "{{baseUrl}}/auth/me",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "me"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
             }
           }
         },
@@ -96,8 +120,14 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -105,8 +135,13 @@
             },
             "url": {
               "raw": "{{baseUrl}}/users/profile",
-              "host": ["{{baseUrl}}"],
-              "path": ["users", "profile"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "profile"
+              ]
             }
           }
         }
@@ -121,8 +156,13 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/destinations/top-regional",
-              "host": ["{{baseUrl}}"],
-              "path": ["destinations", "top-regional"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "destinations",
+                "top-regional"
+              ]
             }
           }
         },
@@ -132,13 +172,30 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/destinations/search?search=Paris&region=Europe&sortBy=popularityScore&sortOrder=desc",
-              "host": ["{{baseUrl}}"],
-              "path": ["destinations", "search"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "destinations",
+                "search"
+              ],
               "query": [
-                { "key": "search", "value": "Paris" },
-                { "key": "region", "value": "Europe" },
-                { "key": "sortBy", "value": "popularityScore" },
-                { "key": "sortOrder", "value": "desc" }
+                {
+                  "key": "search",
+                  "value": "Paris"
+                },
+                {
+                  "key": "region",
+                  "value": "Europe"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "popularityScore"
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc"
+                }
               ]
             }
           }
@@ -149,8 +206,14 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/destinations/{{cityId}}/suggestions",
-              "host": ["{{baseUrl}}"],
-              "path": ["destinations", "{{cityId}}", "suggestions"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "destinations",
+                "{{cityId}}",
+                "suggestions"
+              ]
             }
           }
         }
@@ -165,13 +228,30 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/activities/search?city=Paris&sortBy=popularityScore&sortOrder=desc&groupBy=category",
-              "host": ["{{baseUrl}}"],
-              "path": ["activities", "search"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "activities",
+                "search"
+              ],
               "query": [
-                { "key": "city", "value": "Paris" },
-                { "key": "sortBy", "value": "popularityScore" },
-                { "key": "sortOrder", "value": "desc" },
-                { "key": "groupBy", "value": "category" }
+                {
+                  "key": "city",
+                  "value": "Paris"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "popularityScore"
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc"
+                },
+                {
+                  "key": "groupBy",
+                  "value": "category"
+                }
               ]
             }
           }
@@ -186,8 +266,14 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -195,8 +281,12 @@
             },
             "url": {
               "raw": "{{baseUrl}}/trips",
-              "host": ["{{baseUrl}}"],
-              "path": ["trips"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "trips"
+              ]
             }
           }
         },
@@ -205,14 +295,25 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
             ],
             "url": {
               "raw": "{{baseUrl}}/trips/my-trips?status=upcoming",
-              "host": ["{{baseUrl}}"],
-              "path": ["trips", "my-trips"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "trips",
+                "my-trips"
+              ],
               "query": [
-                { "key": "status", "value": "upcoming" }
+                {
+                  "key": "status",
+                  "value": "upcoming"
+                }
               ]
             }
           }
@@ -222,12 +323,20 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
             ],
             "url": {
               "raw": "{{baseUrl}}/trips/{{tripId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["trips", "{{tripId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "trips",
+                "{{tripId}}"
+              ]
             }
           }
         }
@@ -241,8 +350,14 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -250,8 +365,14 @@
             },
             "url": {
               "raw": "{{baseUrl}}/trips/{{tripId}}/sections",
-              "host": ["{{baseUrl}}"],
-              "path": ["trips", "{{tripId}}", "sections"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "trips",
+                "{{tripId}}",
+                "sections"
+              ]
             }
           }
         },
@@ -260,8 +381,14 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -269,8 +396,15 @@
             },
             "url": {
               "raw": "{{baseUrl}}/trips/sections/{{sectionId}}/items",
-              "host": ["{{baseUrl}}"],
-              "path": ["trips", "sections", "{{sectionId}}", "items"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "trips",
+                "sections",
+                "{{sectionId}}",
+                "items"
+              ]
             }
           }
         },
@@ -280,8 +414,14 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/trips/{{tripId}}/itinerary",
-              "host": ["{{baseUrl}}"],
-              "path": ["trips", "{{tripId}}", "itinerary"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "trips",
+                "{{tripId}}",
+                "itinerary"
+              ]
             }
           }
         },
@@ -291,8 +431,14 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/trips/{{tripId}}/budget-summary",
-              "host": ["{{baseUrl}}"],
-              "path": ["trips", "{{tripId}}", "budget-summary"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "trips",
+                "{{tripId}}",
+                "budget-summary"
+              ]
             }
           }
         }
@@ -306,15 +452,29 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
             ],
             "url": {
               "raw": "{{baseUrl}}/trips/calendar?year=2026&month=9",
-              "host": ["{{baseUrl}}"],
-              "path": ["trips", "calendar"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "trips",
+                "calendar"
+              ],
               "query": [
-                { "key": "year", "value": "2026" },
-                { "key": "month", "value": "9" }
+                {
+                  "key": "year",
+                  "value": "2026"
+                },
+                {
+                  "key": "month",
+                  "value": "9"
+                }
               ]
             }
           }
@@ -330,8 +490,13 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/community/posts",
-              "host": ["{{baseUrl}}"],
-              "path": ["community", "posts"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "community",
+                "posts"
+              ]
             }
           }
         },
@@ -340,8 +505,14 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -349,8 +520,13 @@
             },
             "url": {
               "raw": "{{baseUrl}}/community/posts",
-              "host": ["{{baseUrl}}"],
-              "path": ["community", "posts"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "community",
+                "posts"
+              ]
             }
           }
         },
@@ -359,12 +535,22 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
             ],
             "url": {
               "raw": "{{baseUrl}}/community/posts/{{postId}}/like",
-              "host": ["{{baseUrl}}"],
-              "path": ["community", "posts", "{{postId}}", "like"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "community",
+                "posts",
+                "{{postId}}",
+                "like"
+              ]
             }
           }
         },
@@ -373,8 +559,14 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -382,8 +574,15 @@
             },
             "url": {
               "raw": "{{baseUrl}}/community/posts/{{postId}}/comments",
-              "host": ["{{baseUrl}}"],
-              "path": ["community", "posts", "{{postId}}", "comments"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "community",
+                "posts",
+                "{{postId}}",
+                "comments"
+              ]
             }
           }
         }
@@ -397,12 +596,20 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
             ],
             "url": {
               "raw": "{{baseUrl}}/admin/users",
-              "host": ["{{baseUrl}}"],
-              "path": ["admin", "users"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users"
+              ]
             }
           }
         },
@@ -411,12 +618,21 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
             ],
             "url": {
               "raw": "{{baseUrl}}/admin/analytics/popular-cities",
-              "host": ["{{baseUrl}}"],
-              "path": ["admin", "analytics", "popular-cities"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "analytics",
+                "popular-cities"
+              ]
             }
           }
         },
@@ -425,12 +641,21 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
             ],
             "url": {
               "raw": "{{baseUrl}}/admin/analytics/popular-activities",
-              "host": ["{{baseUrl}}"],
-              "path": ["admin", "analytics", "popular-activities"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "analytics",
+                "popular-activities"
+              ]
             }
           }
         },
@@ -439,12 +664,21 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
             ],
             "url": {
               "raw": "{{baseUrl}}/admin/analytics/user-trends",
-              "host": ["{{baseUrl}}"],
-              "path": ["admin", "analytics", "user-trends"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "analytics",
+                "user-trends"
+              ]
             }
           }
         }
