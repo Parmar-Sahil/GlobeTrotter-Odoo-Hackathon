@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { INSPIRATION_STORIES } from "@/lib/landingData";
 import { FadeIn } from "../animation/FadeIn";
-import { Sparkles, Calendar, MapPin, ArrowRight } from "lucide-react";
+import { Sparkles, Calendar, ArrowRight } from "lucide-react";
 
 export function TravelInspiration() {
   return (
@@ -12,14 +12,14 @@ export function TravelInspiration() {
       {/* Section Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <FadeIn className="space-y-3 max-w-xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-50 text-[#F95724] text-xs font-bold uppercase tracking-wider">
-            <Sparkles className="w-3.5 h-3.5" /> Featured Stories
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-50 text-[#7C2D12] text-xs font-bold uppercase tracking-wider border border-orange-100">
+            <Sparkles className="w-3.5 h-3.5 text-[#F95724]" /> Curated Stories
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight">
             Get inspired for your next journey.
           </h2>
           <p className="text-sm sm:text-base text-slate-500 leading-relaxed">
-            Read carefully curated multi-stop itineraries designed by travel experts and real globetrotters.
+            Browse structured multi-stop itineraries designed by seasoned travel curators and fellow globetrotters.
           </p>
         </FadeIn>
       </div>
@@ -28,13 +28,13 @@ export function TravelInspiration() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {INSPIRATION_STORIES.map((story, idx) => (
           <FadeIn key={story.id} delay={idx * 0.1} distance={20}>
-            <div className="group relative rounded-3xl overflow-hidden border border-slate-200 shadow-md hover:shadow-2xl transition-all duration-300 flex flex-col h-[420px] justify-end p-6 sm:p-8">
-              {/* Background Image with Zoom */}
+            <div className="group relative rounded-3xl overflow-hidden border border-orange-100 shadow-md hover:shadow-2xl transition-all duration-300 flex flex-col h-[420px] justify-end p-6 sm:p-8 bg-slate-950">
+              {/* Background Image */}
               <div className="absolute inset-0 overflow-hidden">
                 <img
                   src={story.image}
                   alt={story.title}
-                  className="w-full h-full object-cover group-hover:scale-106 transition-transform duration-700 ease-out"
+                  className="w-full h-full object-cover opacity-80 group-hover:scale-106 group-hover:opacity-90 transition-all duration-700 ease-out"
                   loading="lazy"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
@@ -42,14 +42,14 @@ export function TravelInspiration() {
 
               {/* Badge */}
               <div className="absolute top-5 left-5 z-10">
-                <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#F95724] text-white shadow-md">
+                <span className="px-3.5 py-1 rounded-full text-xs font-bold bg-[#F95724] text-white shadow-md">
                   {story.badge}
                 </span>
               </div>
 
               {/* Content */}
               <div className="relative z-10 space-y-3 text-white">
-                <div className="flex items-center gap-4 text-xs text-orange-300 font-semibold">
+                <div className="flex items-center gap-4 text-xs text-orange-200 font-bold">
                   <span className="flex items-center gap-1">
                     <Calendar className="w-3.5 h-3.5" /> {story.duration}
                   </span>
@@ -61,7 +61,7 @@ export function TravelInspiration() {
                   {story.title}
                 </h3>
 
-                <p className="text-xs text-slate-300 line-clamp-1">
+                <p className="text-xs text-slate-300 line-clamp-1 font-normal">
                   {story.tagline}
                 </p>
 

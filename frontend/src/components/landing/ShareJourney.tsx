@@ -10,8 +10,7 @@ import {
   Globe,
   Calendar,
   MapPin,
-  Sparkles,
-  DollarSign,
+  Users,
 } from "lucide-react";
 
 export function ShareJourney() {
@@ -23,13 +22,13 @@ export function ShareJourney() {
   };
 
   return (
-    <section className="py-20 lg:py-28 bg-slate-100/70 border-t border-slate-200">
+    <section className="py-20 lg:py-28 bg-[#FAF7F2] border-t border-orange-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
         {/* Section Header */}
         <div className="text-center space-y-3 max-w-2xl mx-auto">
           <FadeIn>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-50 text-[#F95724] text-xs font-bold uppercase tracking-wider">
-              <Globe className="w-3.5 h-3.5" /> Social & Public Itineraries
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-orange-200 text-[#7C2D12] text-xs font-bold uppercase tracking-wider shadow-2xs">
+              <Users className="w-3.5 h-3.5 text-[#F95724]" /> Social Travel Planning
             </div>
           </FadeIn>
           <FadeIn delay={0.1}>
@@ -46,13 +45,13 @@ export function ShareJourney() {
 
         {/* Public Trip Preview Box */}
         <FadeIn delay={0.3}>
-          <div className="max-w-3xl mx-auto bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden">
+          <div className="max-w-3xl mx-auto bg-white rounded-3xl border border-orange-100 shadow-xl shadow-orange-950/5 overflow-hidden">
             {/* Header Banner */}
-            <div className="relative h-48 sm:h-60 w-full overflow-hidden bg-slate-900 text-white p-6 sm:p-8 flex flex-col justify-between">
+            <div className="relative h-48 sm:h-60 w-full overflow-hidden bg-slate-950 text-white p-6 sm:p-8 flex flex-col justify-between">
               <img
                 src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=1000&auto=format&fit=crop&q=80"
-                alt="Shared Paris & Italy Trip"
-                className="absolute inset-0 w-full h-full object-cover opacity-40"
+                alt="Shared European Journey"
+                className="absolute inset-0 w-full h-full object-cover opacity-45"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
 
@@ -77,9 +76,9 @@ export function ShareJourney() {
 
             {/* Details Body */}
             <div className="p-6 sm:p-8 space-y-6">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 py-3 border-y border-slate-100 text-xs">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 py-3 border-y border-orange-100/70 text-xs">
                 <div className="space-y-0.5">
-                  <span className="text-slate-400 font-medium">Dates</span>
+                  <span className="text-slate-400 font-medium">Duration</span>
                   <p className="font-bold text-slate-800">Oct 10 – 20</p>
                 </div>
                 <div className="space-y-0.5">
@@ -92,7 +91,7 @@ export function ShareJourney() {
                 </div>
                 <div className="space-y-0.5">
                   <span className="text-slate-400 font-medium">Est. Budget</span>
-                  <p className="font-bold text-blue-600">₹94,000</p>
+                  <p className="font-bold text-[#7C2D12]">₹94,000</p>
                 </div>
               </div>
 
@@ -101,7 +100,7 @@ export function ShareJourney() {
                 <button
                   type="button"
                   onClick={handleShareClick}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-slate-200 text-slate-700 font-bold text-xs hover:bg-slate-50 transition-colors shadow-2xs"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full border border-orange-200 text-slate-700 font-bold text-xs hover:bg-orange-50/70 transition-colors shadow-2xs"
                 >
                   {copied ? (
                     <>
@@ -109,14 +108,14 @@ export function ShareJourney() {
                     </>
                   ) : (
                     <>
-                      <Share2 className="w-4 h-4 text-slate-500" /> Share Trip
+                      <Share2 className="w-4 h-4 text-[#F95724]" /> Share Trip
                     </>
                   )}
                 </button>
 
                 <Link
                   href="/trips/new"
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-500/20 transition-all hover:scale-105"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3 rounded-full bg-[#7C2D12] hover:bg-[#9A3412] text-white font-bold text-xs shadow-md shadow-orange-950/20 transition-all hover:scale-103"
                 >
                   <Copy className="w-4 h-4" /> Copy This Trip to My Account
                 </Link>

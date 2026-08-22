@@ -4,13 +4,11 @@ import React from "react";
 import { FadeIn } from "../animation/FadeIn";
 import {
   Calendar as CalendarIcon,
-  Clock,
-  MapPin,
-  Sparkles,
+  Compass,
   Utensils,
   Sun,
   Moon,
-  Compass,
+  Sparkles,
 } from "lucide-react";
 
 export function TimelinePreview() {
@@ -27,8 +25,8 @@ export function TimelinePreview() {
         },
         {
           time: "01:00 PM",
-          title: "Traditional Goan Lunch",
-          category: "Food & Drink",
+          title: "Traditional Goan Thali Lunch",
+          category: "Dining",
           icon: Utensils,
         },
         {
@@ -40,7 +38,7 @@ export function TimelinePreview() {
         {
           time: "08:00 PM",
           title: "Candlelight Seaside Dinner",
-          category: "Dining",
+          category: "Dinner",
           icon: Moon,
         },
       ],
@@ -51,19 +49,19 @@ export function TimelinePreview() {
       events: [
         {
           time: "10:00 AM",
-          title: "Fontainhas Latin Quarter Heritage Walk",
-          category: "Culture",
+          title: "Fontainhas Latin Quarter Walk",
+          category: "Heritage",
           icon: Compass,
         },
         {
           time: "03:00 PM",
           title: "State Museum & Art Gallery Visit",
-          category: "History",
+          category: "Culture",
           icon: Sparkles,
         },
         {
           time: "07:00 PM",
-          title: "Saturday Night Market & Live Music",
+          title: "Saturday Night Market & Music",
           category: "Nightlife",
           icon: Moon,
         },
@@ -72,13 +70,13 @@ export function TimelinePreview() {
   ];
 
   return (
-    <section className="py-20 lg:py-28 bg-slate-50 border-t border-slate-200">
+    <section className="py-20 lg:py-28 bg-[#FAF7F2] border-t border-orange-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
         {/* Section Header */}
         <div className="text-center space-y-3 max-w-2xl mx-auto">
           <FadeIn>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-50 text-[#F95724] text-xs font-bold uppercase tracking-wider">
-              <CalendarIcon className="w-3.5 h-3.5" /> Timeline View
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-orange-200 text-[#7C2D12] text-xs font-bold uppercase tracking-wider shadow-2xs">
+              <CalendarIcon className="w-3.5 h-3.5 text-[#F95724]" /> Timeline Stream
             </div>
           </FadeIn>
           <FadeIn delay={0.1}>
@@ -88,7 +86,7 @@ export function TimelinePreview() {
           </FadeIn>
           <FadeIn delay={0.2}>
             <p className="text-sm sm:text-base text-slate-500 leading-relaxed">
-              Seamlessly browse day by day. Experience a clean vertical stream that gives you full confidence in your daily rhythm.
+              Seamlessly browse day by day. Experience a clean vertical stream that gives you complete clarity on your travel pace.
             </p>
           </FadeIn>
         </div>
@@ -97,8 +95,8 @@ export function TimelinePreview() {
         <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
           {timelineDays.map((day, dIdx) => (
             <FadeIn key={day.date} delay={dIdx * 0.15} distance={20}>
-              <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-6">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div className="bg-white rounded-3xl border border-orange-100 shadow-sm p-6 sm:p-8 space-y-6">
+                <div className="flex items-center justify-between border-b border-orange-100/70 pb-4">
                   <div>
                     <span className="text-xs font-extrabold text-[#F95724] uppercase tracking-wider block">
                       {day.date}
@@ -107,7 +105,7 @@ export function TimelinePreview() {
                       {day.dayName}
                     </h3>
                   </div>
-                  <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600">
+                  <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-[#FAF7F5] text-slate-700 border border-orange-100">
                     {day.events.length} Events
                   </span>
                 </div>
@@ -123,11 +121,11 @@ export function TimelinePreview() {
                           <span className="text-xs font-bold text-slate-800">
                             {ev.time}
                           </span>
-                          <span className="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 font-medium">
+                          <span className="text-[10px] px-2 py-0.5 rounded-md bg-[#FAF7F5] text-slate-600 font-medium">
                             {ev.category}
                           </span>
                         </div>
-                        <h4 className="text-sm font-semibold text-slate-700">
+                        <h4 className="text-sm font-bold text-slate-800">
                           {ev.title}
                         </h4>
                       </div>

@@ -25,21 +25,21 @@ export function PlanningSearch() {
   };
 
   return (
-    <section className="relative z-20 -mt-10 sm:-mt-14 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      <FadeIn delay={0.2} duration={0.6}>
-        <div className="bg-white rounded-3xl border border-slate-200/90 shadow-2xl p-6 sm:p-8 lg:p-10 space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-4">
+    <section className="relative z-20 -mt-8 sm:-mt-12 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <FadeIn delay={0.1} duration={0.6}>
+        <div className="bg-white rounded-3xl border border-orange-100 shadow-2xl shadow-orange-950/10 p-6 sm:p-8 lg:p-10 space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-orange-100/70 pb-4">
             <div>
               <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-blue-600" />
+                <Sparkles className="w-5 h-5 text-[#F95724]" />
                 Start with a destination.
               </h2>
               <p className="text-xs sm:text-sm text-slate-500">
-                Choose your dream spot and let GlobeTrotter structure your route
+                Choose your dream spot and let GlobTrottler structure your full journey
               </p>
             </div>
-            <span className="hidden sm:inline-flex text-xs font-bold text-blue-600 uppercase tracking-wider bg-blue-50 px-3 py-1 rounded-full">
-              Quick Setup
+            <span className="hidden sm:inline-flex text-xs font-bold text-[#7C2D12] uppercase tracking-wider bg-orange-50 px-3 py-1 rounded-full border border-orange-100">
+              Trip Generator
             </span>
           </div>
 
@@ -51,13 +51,13 @@ export function PlanningSearch() {
                   Where to?
                 </label>
                 <div className="relative">
-                  <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <Search className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     value={destination}
                     onChange={(e) => setDestination(e.target.value)}
                     placeholder="e.g. Kyoto, Goa, Amalfi..."
-                    className="w-full pl-9 pr-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
+                    className="w-full pl-11 pr-4 py-3.5 bg-[#FAF7F5] border border-slate-200 rounded-2xl text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-orange-500/20 focus:border-[#F95724] transition-all font-medium"
                   />
                 </div>
               </div>
@@ -68,12 +68,12 @@ export function PlanningSearch() {
                   When?
                 </label>
                 <div className="relative">
-                  <Calendar className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <Calendar className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
                   <input
                     type="date"
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full pl-9 pr-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
+                    className="w-full pl-11 pr-4 py-3.5 bg-[#FAF7F5] border border-slate-200 rounded-2xl text-xs sm:text-sm text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-orange-500/20 focus:border-[#F95724] transition-all font-medium"
                   />
                 </div>
               </div>
@@ -84,11 +84,11 @@ export function PlanningSearch() {
                   Travel Style
                 </label>
                 <div className="relative">
-                  <Compass className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <Compass className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
                   <select
                     value={travelStyle}
                     onChange={(e) => setTravelStyle(e.target.value)}
-                    className="w-full pl-9 pr-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium appearance-none cursor-pointer"
+                    className="w-full pl-11 pr-4 py-3.5 bg-[#FAF7F5] border border-slate-200 rounded-2xl text-xs sm:text-sm text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-orange-500/20 focus:border-[#F95724] transition-all font-medium appearance-none cursor-pointer"
                   >
                     <option value="Balanced Exploration">Balanced Exploration</option>
                     <option value="Cultural Heritage">Cultural Heritage</option>
@@ -105,22 +105,22 @@ export function PlanningSearch() {
                   Target Budget
                 </label>
                 <div className="relative">
-                  <DollarSign className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <DollarSign className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     value={budget}
                     onChange={(e) => setBudget(e.target.value)}
                     placeholder="e.g. ₹45,000 / $600"
-                    className="w-full pl-9 pr-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
+                    className="w-full pl-11 pr-4 py-3.5 bg-[#FAF7F5] border border-slate-200 rounded-2xl text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-orange-500/20 focus:border-[#F95724] transition-all font-medium"
                   />
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center justify-end pt-2">
+            <div className="flex items-center justify-end pt-1">
               <button
                 type="submit"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-md shadow-blue-600/20 transition-all hover:scale-102 active:scale-98"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full bg-[#7C2D12] hover:bg-[#9A3412] text-white font-bold text-sm shadow-md shadow-orange-950/20 transition-all hover:scale-102 active:scale-98"
               >
                 Start Planning <ArrowRight className="w-4 h-4" />
               </button>

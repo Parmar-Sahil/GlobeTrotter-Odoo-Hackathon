@@ -34,7 +34,7 @@ export default function HomePage() {
         style={{ scaleX }}
       />
 
-      <div className="min-h-screen flex flex-col bg-white text-slate-900 selection:bg-orange-100 selection:text-orange-900">
+      <div className="min-h-screen flex flex-col bg-[#FAF7F2] text-slate-900 selection:bg-orange-100 selection:text-orange-900">
         {/* 1. Floating Navbar */}
         <LandingNavbar />
 
