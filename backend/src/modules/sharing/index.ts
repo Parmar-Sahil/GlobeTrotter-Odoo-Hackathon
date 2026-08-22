@@ -1,0 +1,2 @@
+// Sharing module placeholder
+export {};

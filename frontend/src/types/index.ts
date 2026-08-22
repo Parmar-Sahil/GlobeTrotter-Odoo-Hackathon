@@ -1,0 +1,7 @@
+// TypeScript types and interfaces placeholder
+export interface ApiResponse<T = unknown> {
+  success: boolean;
+  message: string;
+  data?: T;
+  errors?: string[];
+}
