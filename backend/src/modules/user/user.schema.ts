@@ -5,9 +5,15 @@ export const updateProfileSchema = z.object({
     firstName: z.string().min(1).optional(),
     lastName: z.string().min(1).optional(),
     avatarUrl: z.string().url().optional().or(z.literal('')),
+    profilePhotoUrl: z.string().url().optional().or(z.literal('')),
     phoneNumber: z.string().optional(),
+    phone: z.string().optional(),
     city: z.string().optional(),
     country: z.string().optional(),
     bio: z.string().optional(),
+    language: z.string().optional(),
+    preferredLanguage: z.string().optional(),
+    currency: z.string().optional(),
   }),
 });
+

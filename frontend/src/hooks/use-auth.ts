@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { authService } from "@/lib/services/auth.service";
+import { userService, UpdateProfileDto } from "@/lib/services/user.service";
 import { useState, useEffect } from "react";
 import { User } from "@/types";
 
@@ -42,10 +43,22 @@ export function useAuth() {
     },
   });
 
+  const updateProfileMutation = useMutation({
+    mutationFn: (data: UpdateProfileDto) => userService.updateProfile(data),
+    onSuccess: (updatedUser) => {
+      if (typeof window !== "undefined") {
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+      }
+      queryClient.setQueryData(["auth", "me"], updatedUser);
+      queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
+    },
+  });
+
   const logout = () => {
     authService.logout();
     queryClient.setQueryData(["auth", "me"], null);
     queryClient.invalidateQueries({ queryKey: ["trips"] });
+    queryClient.invalidateQueries({ queryKey: ["auth"] });
   };
 
   const currentUser: User | null =
@@ -62,6 +75,9 @@ export function useAuth() {
     register: registerMutation.mutateAsync,
     isRegistering: registerMutation.isPending,
     registerError: registerMutation.error,
+    updateProfile: updateProfileMutation.mutateAsync,
+    isUpdatingProfile: updateProfileMutation.isPending,
+    updateProfileError: updateProfileMutation.error,
     logout,
     refetch,
   };

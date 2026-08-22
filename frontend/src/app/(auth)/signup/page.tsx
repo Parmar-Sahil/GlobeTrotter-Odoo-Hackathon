@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@/lib/zod-resolver";
 import { signupSchema, SignupFormData } from "@/schemas/auth.schema";
@@ -22,6 +22,10 @@ import {
 
 export default function SignupPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectParam = searchParams.get("redirect");
+  const actionParam = searchParams.get("action");
+
   const { register: registerUser, isRegistering } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -63,7 +67,14 @@ export default function SignupPage() {
         lastName,
       });
 
-      router.push("/dashboard");
+      if (redirectParam) {
+        const dest = actionParam
+          ? `${redirectParam}${redirectParam.includes("?") ? "&" : "?"}action=${actionParam}`
+          : redirectParam;
+        router.push(dest);
+      } else {
+        router.push("/dashboard");
+      }
     } catch (err: any) {
       const rawMsg = err.response?.data?.message || err.message || "";
       if (rawMsg.includes("Can't reach database server") || rawMsg.includes("localhost:5432")) {

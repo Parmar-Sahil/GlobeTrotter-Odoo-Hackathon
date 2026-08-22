@@ -51,6 +51,12 @@ export interface AddItemDto {
   category?: string;
 }
 
+export interface UpdateItemDto extends Partial<AddItemDto> {
+  stopId?: string;
+}
+
+export interface UpdateSectionDto extends Partial<AddSectionDto> {}
+
 export const tripService = {
   async getMyTrips(params?: {
     status?: string;
@@ -106,6 +112,21 @@ export const tripService = {
     return res.data.data!;
   },
 
+  async updateSection(
+    sectionId: string,
+    data: UpdateSectionDto
+  ): Promise<ItinerarySection> {
+    const res = await apiClient.put<ApiResponse<ItinerarySection>>(
+      `/trips/sections/${sectionId}`,
+      data
+    );
+    return res.data.data!;
+  },
+
+  async deleteSection(sectionId: string): Promise<void> {
+    await apiClient.delete(`/trips/sections/${sectionId}`);
+  },
+
   async addItem(sectionId: string, data: AddItemDto): Promise<ItineraryItem> {
     const payload: any = {
       ...data,
@@ -118,6 +139,26 @@ export const tripService = {
       payload
     );
     return res.data.data!;
+  },
+
+  async updateItem(
+    itemId: string,
+    data: UpdateItemDto
+  ): Promise<ItineraryItem> {
+    const payload: any = {
+      ...data,
+      costEstimate: data.costEstimate || data.cost,
+      cost: data.cost || data.costEstimate,
+    };
+    const res = await apiClient.put<ApiResponse<ItineraryItem>>(
+      `/trips/items/${itemId}`,
+      payload
+    );
+    return res.data.data!;
+  },
+
+  async deleteItem(itemId: string): Promise<void> {
+    await apiClient.delete(`/trips/items/${itemId}`);
   },
 
   async getItinerary(tripId: string): Promise<{ sections: ItinerarySection[] }> {

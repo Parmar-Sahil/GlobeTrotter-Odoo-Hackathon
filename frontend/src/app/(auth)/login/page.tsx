@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@/lib/zod-resolver";
 import { loginSchema, LoginFormData } from "@/schemas/auth.schema";
@@ -12,6 +12,10 @@ import { Mail, Lock, Eye, EyeOff, ArrowRight, AlertCircle } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectParam = searchParams.get("redirect");
+  const actionParam = searchParams.get("action");
+
   const { login, isLoggingIn } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
@@ -36,7 +40,15 @@ export default function LoginPage() {
         usernameOrEmail: data.email,
         password: data.password,
       });
-      router.push("/dashboard");
+
+      if (redirectParam) {
+        const dest = actionParam
+          ? `${redirectParam}${redirectParam.includes("?") ? "&" : "?"}action=${actionParam}`
+          : redirectParam;
+        router.push(dest);
+      } else {
+        router.push("/dashboard");
+      }
     } catch (err: any) {
       const rawMsg = err.response?.data?.message || err.message || "";
       if (rawMsg.includes("Can't reach database server") || rawMsg.includes("localhost:5432")) {

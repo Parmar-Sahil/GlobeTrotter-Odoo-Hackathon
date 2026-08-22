@@ -33,6 +33,22 @@ export class TripFacade {
     return await tripItineraryService.addItemToSection(sectionId, userId, data);
   }
 
+  static async updateItineraryItem(itemId: string, userId: string, data: any) {
+    return await tripItineraryService.updateItineraryItem(itemId, userId, data);
+  }
+
+  static async deleteItineraryItem(itemId: string, userId: string) {
+    return await tripItineraryService.deleteItineraryItem(itemId, userId);
+  }
+
+  static async updateTripSection(sectionId: string, userId: string, data: any) {
+    return await tripItineraryService.updateTripSection(sectionId, userId, data);
+  }
+
+  static async deleteTripSection(sectionId: string, userId: string) {
+    return await tripItineraryService.deleteTripSection(sectionId, userId);
+  }
+
   static async getTripItinerary(tripId: string) {
     return await tripItineraryService.getTripItinerary(tripId);
   }

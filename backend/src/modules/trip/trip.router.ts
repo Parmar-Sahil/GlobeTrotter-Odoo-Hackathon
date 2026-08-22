@@ -21,7 +21,13 @@ router.delete('/:id', authenticate, tripController.deleteTrip);
 
 // Itinerary Sections & Items
 router.post('/:id/sections', authenticate, validateRequest(createSectionSchema), tripController.addSection);
+router.put('/sections/:sectionId', authenticate, tripController.updateSection);
+router.delete('/sections/:sectionId', authenticate, tripController.deleteSection);
+
 router.post('/sections/:sectionId/items', authenticate, validateRequest(createItemSchema), tripController.addItem);
+router.put('/items/:itemId', authenticate, tripController.updateItem);
+router.delete('/items/:itemId', authenticate, tripController.deleteItem);
+
 router.get('/:id/itinerary', tripController.getItinerary);
 router.get('/:id/budget-summary', tripController.getBudgetSummary);
 

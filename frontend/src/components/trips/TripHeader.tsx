@@ -16,13 +16,15 @@ import {
   Sparkles,
 } from "lucide-react";
 
+import { ShareTripModal } from "./ShareTripModal";
+
 interface TripHeaderProps {
   trip: Trip;
   onShareClick?: () => void;
 }
 
 export function TripHeader({ trip, onShareClick }: TripHeaderProps) {
-  const [copied, setCopied] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   const fallbackImage =
     "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=1200&auto=format&fit=crop&q=80";
@@ -32,11 +34,7 @@ export function TripHeader({ trip, onShareClick }: TripHeaderProps) {
       onShareClick();
       return;
     }
-
-    const shareUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/shared/${trip.id}`;
-    navigator.clipboard.writeText(shareUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2500);
+    setIsShareModalOpen(true);
   };
 
   const destinationCount = trip.destinationCount ?? trip.sections?.length ?? 0;
@@ -73,17 +71,8 @@ export function TripHeader({ trip, onShareClick }: TripHeaderProps) {
               onClick={handleShare}
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur-md text-xs font-bold text-white border border-white/20 transition-all shadow-xs"
             >
-              {copied ? (
-                <>
-                  <Check className="w-3.5 h-3.5 text-emerald-400" />
-                  Link Copied!
-                </>
-              ) : (
-                <>
-                  <Share2 className="w-3.5 h-3.5 text-orange-300" />
-                  Share Itinerary
-                </>
-              )}
+              <Share2 className="w-3.5 h-3.5 text-orange-300" />
+              Share Itinerary
             </button>
           </div>
         </div>
@@ -148,6 +137,13 @@ export function TripHeader({ trip, onShareClick }: TripHeaderProps) {
           )}
         </div>
       </div>
+
+      {/* Share Modal Dialog */}
+      <ShareTripModal
+        trip={trip}
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+      />
     </div>
   );
 }

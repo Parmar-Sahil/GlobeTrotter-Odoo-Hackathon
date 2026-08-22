@@ -34,7 +34,7 @@ export default function TripWorkspacePage({ params }: TripWorkspaceProps) {
     useTripItinerary(tripId);
   const { data: budgetData } = useTripBudget(tripId);
 
-  const { addSection, addItem } = useTripMutations(tripId);
+  const { addSection, addItem, deleteItem } = useTripMutations(tripId);
 
   const sections = itineraryData?.sections || trip?.sections || [];
 
@@ -61,6 +61,10 @@ export default function TripWorkspacePage({ params }: TripWorkspaceProps) {
     }
   ) => {
     await addItem({ sectionId, tripId, data });
+  };
+
+  const handleRemoveItem = async (sectionId: string, itemId: string) => {
+    await deleteItem({ itemId, tripId });
   };
 
   if (tripLoading || itineraryLoading) {
@@ -127,6 +131,7 @@ export default function TripWorkspacePage({ params }: TripWorkspaceProps) {
               sections={sections}
               onAddSection={handleAddSection}
               onAddItem={handleAddItem}
+              onRemoveItem={handleRemoveItem}
             />
           )}
 
