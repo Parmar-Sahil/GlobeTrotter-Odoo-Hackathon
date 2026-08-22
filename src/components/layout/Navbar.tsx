@@ -15,19 +15,26 @@ import {
   BarChart3,
   Sun,
   Moon,
-  Globe2
+  Globe2,
+  Plane
 } from 'lucide-react';
 import { useTravel, AppView } from '../../context/TravelContext';
 import { PersonaSwitcher } from '../common/PersonaSwitcher';
 import { NotificationDrawer } from './NotificationDrawer';
 import { GlobiChatModal } from '../mascot/GlobiChatModal';
+import { BrandLogo, BrandPlaneIcon } from '../common/BrandLogo';
 
 interface NavbarProps {
   onOpenCreateTrip: () => void;
   onOpenOnboarding: () => void;
+  onTriggerLoading?: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onOpenCreateTrip, onOpenOnboarding }) => {
+export const Navbar: React.FC<NavbarProps> = ({
+  onOpenCreateTrip,
+  onOpenOnboarding,
+  onTriggerLoading
+}) => {
   const {
     currentUser,
     currentView,
@@ -58,27 +65,21 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCreateTrip, onOpenOnboardi
     <>
       <header className="sticky top-0 z-40 w-full clean-nav transition-colors duration-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3 sm:gap-6">
-          {/* Brand Logo */}
+          {/* Brand Logo with exact uploaded plane & wordmark */}
           <div className="flex items-center gap-3">
             <button
               onClick={() => setCurrentView('home')}
-              className="flex items-center gap-2.5 group text-left"
+              className="flex items-center gap-2 group text-left transition-transform active:scale-95"
             >
-              <div className="w-9 h-9 rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-700 bg-white flex items-center justify-center p-0.5">
-                <img
-                  src="/assets/logo.jpg"
-                  alt="GlobeTrotter Logo"
-                  className="w-full h-full object-contain rounded-lg"
-                />
-              </div>
+              <BrandPlaneIcon className="w-9 h-9 shadow-brand" />
               <div className="leading-tight">
-                <div className="flex items-center gap-1">
-                  <span className="font-display font-extrabold text-lg tracking-tight text-slate-900 dark:text-white">
-                    Globe<span className="text-rose-500">Trotter</span>
+                <div className="flex items-center gap-0.5">
+                  <span className="font-display font-extrabold text-xl tracking-tight text-slate-900 dark:text-white">
+                    Glob<span className="text-[#F2541B]">Trottler</span>
                   </span>
                 </div>
                 <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium hidden sm:block">
-                  Social Travel Planner
+                  Social Travel Companion
                 </p>
               </div>
             </button>
@@ -110,14 +111,25 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCreateTrip, onOpenOnboardi
             {/* Ask Globi AI Companion Button */}
             <button
               onClick={() => setIsGlobiOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 dark:bg-teal-950/50 border border-teal-200 dark:border-teal-800/60 text-teal-700 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900/50 transition-all text-xs font-bold group shadow-sm"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-900/60 text-[#F2541B] hover:bg-orange-100 dark:hover:bg-orange-900/40 transition-all text-xs font-bold group shadow-sm"
             >
-              <div className="w-5 h-5 rounded-full overflow-hidden border border-teal-400/60 flex-shrink-0">
+              <div className="w-5 h-5 rounded-full overflow-hidden border border-orange-400/60 flex-shrink-0">
                 <img src="/assets/globi_idea.jpg" alt="Globi" className="w-full h-full object-cover" />
               </div>
               <span className="hidden sm:inline">Ask Globi</span>
-              <Sparkles className="w-3.5 h-3.5 text-teal-500 animate-pulse" />
+              <Sparkles className="w-3.5 h-3.5 text-[#F2541B] animate-pulse" />
             </button>
+
+            {/* Replay Flight Loading Demo Button */}
+            {onTriggerLoading && (
+              <button
+                onClick={onTriggerLoading}
+                title="Preview Animated Flight Loading Screen"
+                className="hidden lg:flex p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-slate-700 transition-colors shadow-sm"
+              >
+                <Plane className="w-4 h-4 text-[#F2541B]" />
+              </button>
+            )}
 
             {/* Theme Toggle Button (Light/Dark Mode) */}
             <button
@@ -139,7 +151,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCreateTrip, onOpenOnboardi
             >
               <Bell className="w-4 h-4" />
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center border-2 border-white dark:border-slate-900">
+                <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-[#F2541B] text-white text-[10px] font-bold flex items-center justify-center border-2 border-white dark:border-slate-900">
                   {unreadCount}
                 </span>
               )}
@@ -170,10 +182,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCreateTrip, onOpenOnboardi
               <Users className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 hidden lg:block" />
             </button>
 
-            {/* Plan Trip CTA (Airbnb Coral Style) */}
+            {/* Plan Trip CTA (Brand Orange) */}
             <button
               onClick={onOpenCreateTrip}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-rose-500 hover:bg-rose-600 active:scale-95 text-white font-bold text-xs shadow-sm transition-all"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-[#F2541B] hover:bg-[#d9440f] active:scale-95 text-white font-bold text-xs shadow-brand transition-all"
             >
               <Plus className="w-4 h-4 stroke-[3]" />
               <span className="hidden sm:inline">Plan Trip</span>
@@ -201,7 +213,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCreateTrip, onOpenOnboardi
                 }}
                 className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
                   currentView === link.id
-                    ? 'bg-rose-500 text-white font-bold'
+                    ? 'bg-[#F2541B] text-white font-bold'
                     : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
                 }`}
               >
@@ -224,7 +236,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCreateTrip, onOpenOnboardi
                   setIsPersonaOpen(true);
                   setMobileMenuOpen(false);
                 }}
-                className="flex-1 py-2 text-center text-xs font-semibold text-rose-500 bg-rose-50 dark:bg-rose-950/30 rounded-xl"
+                className="flex-1 py-2 text-center text-xs font-semibold text-[#F2541B] bg-orange-50 dark:bg-orange-950/30 rounded-xl"
               >
                 Switch Persona
               </button>

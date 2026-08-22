@@ -21,7 +21,8 @@ import {
   Mountain,
   Sun,
   Globe2,
-  Search
+  Search,
+  Plane
 } from 'lucide-react';
 import { useTravel } from '../../context/TravelContext';
 import { TripCard } from '../trips/TripCard';
@@ -29,6 +30,7 @@ import { GlobiBanner } from '../mascot/GlobiBanner';
 import { MOCK_DESTINATIONS } from '../../data/mockDestinations';
 import { JoinRequestModal } from '../trips/JoinRequestModal';
 import { Trip } from '../../types/travel';
+import { BrandPlaneIcon } from '../common/BrandLogo';
 
 export const HomeDashboardView: React.FC<{
   onOpenCreateTrip: () => void;
@@ -60,17 +62,17 @@ export const HomeDashboardView: React.FC<{
       {/* Top Proactive Globi Companion Banner */}
       <GlobiBanner />
 
-      {/* Clean Hero Search Banner (Airbnb Style) */}
+      {/* Clean Hero Search Banner (GlobTrottler Style) */}
       <div className="relative rounded-3xl overflow-hidden bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-6 sm:p-10 shadow-sm">
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
           <div className="space-y-3 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 text-xs font-bold">
-              <Sparkles className="w-3.5 h-3.5" />
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-900/60 text-[#F2541B] text-xs font-bold">
+              <BrandPlaneIcon className="w-3.5 h-3.5" />
               <span>Next-Gen Social Travel Experience</span>
             </div>
 
             <h1 className="font-display font-extrabold text-3xl sm:text-4xl lg:text-5xl text-slate-900 dark:text-white tracking-tight leading-tight">
-              Where will you explore next, <span className="text-rose-500">{currentUser.name.split(' ')[0]}</span>?
+              Where will you fly next, <span className="text-[#F2541B]">{currentUser.name.split(' ')[0]}</span>?
             </h1>
 
             <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed">
@@ -81,7 +83,7 @@ export const HomeDashboardView: React.FC<{
             <div className="flex flex-wrap items-center gap-3 pt-2">
               <button
                 onClick={onOpenCreateTrip}
-                className="px-6 py-3 rounded-full bg-rose-500 hover:bg-rose-600 text-white font-bold text-sm shadow-sm flex items-center gap-2 active:scale-95 transition-all"
+                className="px-6 py-3 rounded-full bg-[#F2541B] hover:bg-[#d9440f] text-white font-bold text-sm shadow-brand flex items-center gap-2 active:scale-95 transition-all"
               >
                 <Plus className="w-4 h-4 stroke-[3]" />
                 <span>Plan New Trip</span>
@@ -91,7 +93,7 @@ export const HomeDashboardView: React.FC<{
                 onClick={() => setCurrentView('discover')}
                 className="px-5 py-3 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-sm border border-slate-200 dark:border-slate-700 transition-all flex items-center gap-2"
               >
-                <Compass className="w-4 h-4 text-rose-500" />
+                <Compass className="w-4 h-4 text-[#F2541B]" />
                 <span>Explore Squads</span>
               </button>
 
@@ -115,7 +117,7 @@ export const HomeDashboardView: React.FC<{
                   <h4 className="font-bold text-slate-900 dark:text-white text-sm">Globi Companion</h4>
                   <span className="w-2 h-2 rounded-full bg-emerald-500" />
                 </div>
-                <p className="text-[11px] text-teal-600 dark:text-teal-400 font-medium">Ready to optimize plans</p>
+                <p className="text-[11px] text-[#F2541B] font-medium">Ready to optimize plans</p>
               </div>
             </div>
 
@@ -130,7 +132,7 @@ export const HomeDashboardView: React.FC<{
               </span>
               <button
                 onClick={() => setCurrentView('profile')}
-                className="text-rose-500 font-bold hover:underline"
+                className="text-[#F2541B] font-bold hover:underline"
               >
                 View Passport →
               </button>
@@ -139,7 +141,7 @@ export const HomeDashboardView: React.FC<{
         </div>
       </div>
 
-      {/* Airbnb Category Navigation Bar */}
+      {/* Category Navigation Bar */}
       <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 pt-1 border-b border-slate-200 dark:border-slate-800">
         {categories.map((cat, idx) => {
           const isSelected = (activeCategory === 'All' && idx === 0) || activeCategory === cat.label;
@@ -163,12 +165,12 @@ export const HomeDashboardView: React.FC<{
         })}
       </div>
 
-      {/* Horizontal Discover Section (Teaser into social layer) */}
+      {/* Horizontal Discover Section */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-orange-50 dark:bg-orange-950/40 text-[#F2541B] border border-orange-200 dark:border-orange-900/60">
                 Community Feed
               </span>
               <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white font-display">
@@ -182,7 +184,7 @@ export const HomeDashboardView: React.FC<{
 
           <button
             onClick={() => setCurrentView('discover')}
-            className="text-xs font-bold text-rose-500 hover:text-rose-600 flex items-center gap-1 group"
+            className="text-xs font-bold text-[#F2541B] hover:opacity-80 flex items-center gap-1 group"
           >
             <span>View All ({openCommunityTrips.length})</span>
             <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
@@ -214,7 +216,7 @@ export const HomeDashboardView: React.FC<{
 
           <button
             onClick={() => setCurrentView('trips')}
-            className="text-xs font-bold text-rose-500 hover:text-rose-600 flex items-center gap-1 group"
+            className="text-xs font-bold text-[#F2541B] hover:opacity-80 flex items-center gap-1 group"
           >
             <span>Manage All Trips</span>
             <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
@@ -246,7 +248,7 @@ export const HomeDashboardView: React.FC<{
 
           <button
             onClick={() => setCurrentView('catalog')}
-            className="text-xs font-bold text-rose-500 hover:text-rose-600 flex items-center gap-1 group"
+            className="text-xs font-bold text-[#F2541B] hover:opacity-80 flex items-center gap-1 group"
           >
             <span>Explorer Database</span>
             <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
@@ -278,7 +280,7 @@ export const HomeDashboardView: React.FC<{
                   {dest.city}, {dest.country}
                 </h3>
                 <p className="text-xs text-slate-200 line-clamp-1">{dest.tagline}</p>
-                <div className="pt-1 flex items-center justify-between text-xs font-semibold text-rose-300">
+                <div className="pt-1 flex items-center justify-between text-xs font-semibold text-orange-300">
                   <span>${dest.avgBudgetDaily} / day</span>
                   <span className="group-hover:translate-x-1 transition-transform flex items-center gap-1">
                     Explore Experiences →

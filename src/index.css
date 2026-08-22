@@ -8,6 +8,7 @@
     --text-primary: #0F172A;
     --card-bg: #FFFFFF;
     --border-color: #E2E8F0;
+    --brand-primary: #F2541B;
   }
 
   .dark {
@@ -15,6 +16,7 @@
     --text-primary: #F8FAFC;
     --card-bg: #111827;
     --border-color: #1F2937;
+    --brand-primary: #F2541B;
   }
 
   body {
@@ -38,9 +40,9 @@
   @apply bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800;
 }
 
-/* Brand Button styling */
+/* Brand Button styling (GlobTrottler Brand Orange #F2541B) */
 .btn-primary {
-  @apply bg-rose-500 hover:bg-rose-600 active:scale-95 text-white font-bold text-sm px-4 py-2.5 rounded-xl shadow-sm transition-all;
+  @apply bg-[#F2541B] hover:bg-[#d9440f] active:scale-95 text-white font-bold text-sm px-4 py-2.5 rounded-xl shadow-brand transition-all;
 }
 
 .btn-secondary {

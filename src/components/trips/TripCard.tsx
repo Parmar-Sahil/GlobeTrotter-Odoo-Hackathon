@@ -82,7 +82,7 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onRequestJoin }) => {
             }}
             className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/90 dark:bg-slate-900/90 hover:bg-white text-slate-800 dark:text-white text-xs font-semibold backdrop-blur-md shadow-sm transition-all active:scale-90"
           >
-            <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" />
+            <Heart className="w-3.5 h-3.5 text-[#F2541B] fill-[#F2541B]" />
             <span>{trip.likesCount}</span>
           </button>
         </div>
@@ -90,7 +90,7 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onRequestJoin }) => {
         {/* Destination bottom pill */}
         <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-xs text-white">
           <div className="flex items-center gap-1 font-bold drop-shadow">
-            <MapPin className="w-3.5 h-3.5 text-rose-400" />
+            <MapPin className="w-3.5 h-3.5 text-orange-400" />
             <span>{trip.destination}, {trip.country}</span>
           </div>
           <span className="px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-[11px] font-medium">
@@ -106,7 +106,7 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onRequestJoin }) => {
           <div className="flex items-start justify-between gap-2">
             <h3
               onClick={() => setCurrentView('trip-detail', trip.id)}
-              className="font-display font-bold text-base text-slate-900 dark:text-white group-hover:text-rose-500 dark:group-hover:text-rose-400 transition-colors cursor-pointer line-clamp-1"
+              className="font-display font-bold text-base text-slate-900 dark:text-white group-hover:text-[#F2541B] transition-colors cursor-pointer line-clamp-1"
             >
               {trip.title}
             </h3>
@@ -212,7 +212,7 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onRequestJoin }) => {
             ) : isOpenToJoin ? (
               <button
                 onClick={() => onRequestJoin && onRequestJoin(trip)}
-                className="w-full py-2 px-3 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs shadow-sm transition-all flex items-center justify-center gap-1.5 active:scale-95"
+                className="w-full py-2 px-3 rounded-xl bg-[#F2541B] hover:bg-[#d9440f] text-white font-bold text-xs shadow-brand transition-all flex items-center justify-center gap-1.5 active:scale-95"
               >
                 <UserPlus className="w-3.5 h-3.5" />
                 <span>Join Squad</span>
