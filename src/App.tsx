@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { TravelProvider, useTravel } from './context/TravelContext';
 import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
-import { LandingPageView } from './components/landing/LandingPageView';
+import { AirbnbLandingPage } from './components/landing/AirbnbLandingPage';
 import { HomeDashboardView } from './components/home/HomeDashboardView';
 import { DiscoverFeed } from './components/discover/DiscoverFeed';
 import { MyTripsView } from './components/trips/MyTripsView';
@@ -17,23 +17,31 @@ import { LoadingScreen } from './components/common/LoadingScreen';
 import { Sparkles } from 'lucide-react';
 
 const AppContent: React.FC = () => {
-  const { currentView } = useTravel();
+  const { currentView, isAuthenticated } = useTravel();
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [showLoadingDemo, setShowLoadingDemo] = useState(false);
   const [isCreateTripOpen, setIsCreateTripOpen] = useState(false);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [isFloatingGlobiOpen, setIsFloatingGlobiOpen] = useState(false);
 
+  // If visitor is not authenticated, show the public Airbnb/MakeMyTrip landing page!
+  if (!isAuthenticated) {
+    return (
+      <>
+        {isInitialLoading && (
+          <LoadingScreen
+            minDurationMs={1600}
+            onComplete={() => setIsInitialLoading(false)}
+          />
+        )}
+        <AirbnbLandingPage />
+      </>
+    );
+  }
+
+  // Once authenticated (via 1-click persona or login), show the full rich web application!
   const renderCurrentView = () => {
     switch (currentView) {
-      case 'landing':
-        return (
-          <LandingPageView
-            onOpenCreateTrip={() => setIsCreateTripOpen(true)}
-            onOpenOnboarding={() => setIsOnboardingOpen(true)}
-            onTriggerLoading={() => setShowLoadingDemo(true)}
-          />
-        );
       case 'discover':
         return <DiscoverFeed onOpenCreateTrip={() => setIsCreateTripOpen(true)} />;
       case 'trips':
@@ -65,7 +73,7 @@ const AppContent: React.FC = () => {
       {/* Flight Takeoff Loading Screen on initial launch */}
       {isInitialLoading && (
         <LoadingScreen
-          minDurationMs={1800}
+          minDurationMs={1600}
           onComplete={() => setIsInitialLoading(false)}
         />
       )}
@@ -73,7 +81,7 @@ const AppContent: React.FC = () => {
       {/* Manual Demo Loading Screen trigger */}
       {showLoadingDemo && (
         <LoadingScreen
-          minDurationMs={2000}
+          minDurationMs={1800}
           onComplete={() => setShowLoadingDemo(false)}
         />
       )}

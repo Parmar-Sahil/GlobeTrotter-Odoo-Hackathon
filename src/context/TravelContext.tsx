@@ -15,7 +15,6 @@ import { MOCK_USERS } from '../data/mockUsers';
 import { INITIAL_MOCK_TRIPS } from '../data/mockTrips';
 
 export type AppView = 
-  | 'landing'
   | 'home'
   | 'discover'
   | 'trips'
@@ -33,6 +32,9 @@ interface TravelContextType {
   currentUser: User;
   setCurrentUser: (user: User) => void;
   availableUsers: User[];
+  isAuthenticated: boolean;
+  login: (user?: User) => void;
+  logout: () => void;
   currentView: AppView;
   setCurrentView: (view: AppView, tripId?: string) => void;
   theme: AppTheme;
@@ -88,10 +90,11 @@ interface TravelContextType {
 
 const TravelContext = createContext<TravelContextType | undefined>(undefined);
 
-const LOCAL_STORAGE_KEY_TRIPS = 'globetrotter_trips_v3';
-const LOCAL_STORAGE_KEY_USER = 'globetrotter_current_user_v3';
-const LOCAL_STORAGE_KEY_NOTIFS = 'globetrotter_notifs_v3';
-const LOCAL_STORAGE_KEY_THEME = 'globetrotter_theme_v3';
+const LOCAL_STORAGE_KEY_TRIPS = 'globtrottler_trips_v4';
+const LOCAL_STORAGE_KEY_USER = 'globtrottler_current_user_v4';
+const LOCAL_STORAGE_KEY_NOTIFS = 'globtrottler_notifs_v4';
+const LOCAL_STORAGE_KEY_THEME = 'globtrottler_theme_v4';
+const LOCAL_STORAGE_KEY_AUTH = 'globtrottler_auth_v4';
 
 const INITIAL_NOTIFICATIONS: NotificationItem[] = [
   {
@@ -133,6 +136,11 @@ export const TravelProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     return 'light'; // Default clean light mode
   });
 
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    const saved = localStorage.getItem(LOCAL_STORAGE_KEY_AUTH);
+    return saved === 'true'; // false by default for landing page presentation
+  });
+
   const [currentUser, setCurrentUserState] = useState<User>(() => {
     const saved = localStorage.getItem(LOCAL_STORAGE_KEY_USER);
     if (saved && MOCK_USERS[saved]) return MOCK_USERS[saved];
@@ -163,7 +171,7 @@ export const TravelProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     return INITIAL_NOTIFICATIONS;
   });
 
-  const [currentView, setCurrentViewState] = useState<AppView>('landing');
+  const [currentView, setCurrentViewState] = useState<AppView>('home');
   const [activeTripId, setActiveTripId] = useState<string | null>('trip-bali-01');
   const [globalSearchQuery, setGlobalSearchQuery] = useState<string>('');
   const [globiTip, setGlobiTip] = useState<GlobiSmartTip | null>({
@@ -191,7 +199,10 @@ export const TravelProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
   };
 
-  // Save changes to localStorage
+  useEffect(() => {
+    localStorage.setItem(LOCAL_STORAGE_KEY_AUTH, isAuthenticated ? 'true' : 'false');
+  }, [isAuthenticated]);
+
   useEffect(() => {
     localStorage.setItem(LOCAL_STORAGE_KEY_TRIPS, JSON.stringify(trips));
   }, [trips]);
@@ -205,6 +216,19 @@ export const TravelProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }, [notifications]);
 
   const activeTrip = trips.find(t => t.id === activeTripId) || null;
+
+  const login = (user?: User) => {
+    if (user) {
+      setCurrentUser(user);
+    }
+    setIsAuthenticated(true);
+    setCurrentViewState('home');
+    triggerGlobiCelebration();
+  };
+
+  const logout = () => {
+    setIsAuthenticated(false);
+  };
 
   const setCurrentUser = (user: User) => {
     setCurrentUserState(user);
@@ -874,6 +898,9 @@ export const TravelProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         currentUser,
         setCurrentUser,
         availableUsers: Object.values(MOCK_USERS),
+        isAuthenticated,
+        login,
+        logout,
         currentView,
         setCurrentView,
         theme,

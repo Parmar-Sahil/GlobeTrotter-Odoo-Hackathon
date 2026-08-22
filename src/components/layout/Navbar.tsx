@@ -17,14 +17,14 @@ import {
   Moon,
   Globe2,
   Plane,
-  LayoutDashboard,
-  Home
+  LogOut,
+  ChevronDown
 } from 'lucide-react';
 import { useTravel, AppView } from '../../context/TravelContext';
 import { PersonaSwitcher } from '../common/PersonaSwitcher';
 import { NotificationDrawer } from './NotificationDrawer';
 import { GlobiChatModal } from '../mascot/GlobiChatModal';
-import { BrandLogo, BrandPlaneIcon } from '../common/BrandLogo';
+import { BrandPlaneIcon } from '../common/BrandLogo';
 
 interface NavbarProps {
   onOpenCreateTrip: () => void;
@@ -43,7 +43,8 @@ export const Navbar: React.FC<NavbarProps> = ({
     setCurrentView,
     unreadCount,
     theme,
-    toggleTheme
+    toggleTheme,
+    logout
   } = useTravel();
 
   const [isPersonaOpen, setIsPersonaOpen] = useState(false);
@@ -51,9 +52,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [isGlobiOpen, setIsGlobiOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const isLanding = currentView === 'landing';
-
-  const appNavLinks: { id: AppView; label: string; icon: React.ReactNode }[] = [
+  const navLinks: { id: AppView; label: string; icon: React.ReactNode }[] = [
     { id: 'home', label: 'Explore', icon: <Compass className="w-4 h-4" /> },
     { id: 'discover', label: 'Community Feed', icon: <Globe2 className="w-4 h-4" /> },
     { id: 'trips', label: 'My Trips', icon: <MapPin className="w-4 h-4" /> },
@@ -62,17 +61,17 @@ export const Navbar: React.FC<NavbarProps> = ({
   ];
 
   if (currentUser.isAdmin) {
-    appNavLinks.push({ id: 'admin', label: 'Admin', icon: <BarChart3 className="w-4 h-4" /> });
+    navLinks.push({ id: 'admin', label: 'Admin', icon: <BarChart3 className="w-4 h-4" /> });
   }
 
   return (
     <>
       <header className="sticky top-0 z-40 w-full clean-nav transition-colors duration-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3 sm:gap-6">
-          {/* Brand Logo with exact uploaded plane & wordmark */}
+          {/* Brand Logo */}
           <div className="flex items-center gap-3">
             <button
-              onClick={() => setCurrentView('landing')}
+              onClick={() => setCurrentView('home')}
               className="flex items-center gap-2 group text-left transition-transform active:scale-95"
             >
               <BrandPlaneIcon className="w-9 h-9 shadow-brand" />
@@ -89,28 +88,15 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
           </div>
 
-          {/* Desktop Nav Links */}
+          {/* Desktop Nav Links (Clean Airbnb-style pill tabs) */}
           <nav className="hidden md:flex items-center gap-1 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-full border border-slate-200/60 dark:border-slate-700/60">
-            {/* Landing Page Link */}
-            <button
-              onClick={() => setCurrentView('landing')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                isLanding
-                  ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm font-bold'
-                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
-              }`}
-            >
-              <Home className="w-3.5 h-3.5" />
-              <span>Overview</span>
-            </button>
-
-            {appNavLinks.map(link => {
+            {navLinks.map(link => {
               const isActive = currentView === link.id;
               return (
                 <button
                   key={link.id}
                   onClick={() => setCurrentView(link.id)}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                  className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
                     isActive
                       ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm font-bold'
                       : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
@@ -196,27 +182,26 @@ export const Navbar: React.FC<NavbarProps> = ({
                   {currentUser.name.split(' ')[0]}
                 </p>
               </div>
-              <Users className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 hidden lg:block" />
+              <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 hidden lg:block" />
             </button>
 
-            {/* Plan Trip / Open App CTA */}
-            {isLanding ? (
-              <button
-                onClick={() => setCurrentView('home')}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#F2541B] hover:bg-[#d9440f] active:scale-95 text-white font-bold text-xs shadow-brand transition-all"
-              >
-                <LayoutDashboard className="w-4 h-4" />
-                <span>Open App</span>
-              </button>
-            ) : (
-              <button
-                onClick={onOpenCreateTrip}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-[#F2541B] hover:bg-[#d9440f] active:scale-95 text-white font-bold text-xs shadow-brand transition-all"
-              >
-                <Plus className="w-4 h-4 stroke-[3]" />
-                <span className="hidden sm:inline">Plan Trip</span>
-              </button>
-            )}
+            {/* Plan Trip CTA (Brand Orange) */}
+            <button
+              onClick={onOpenCreateTrip}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-[#F2541B] hover:bg-[#d9440f] active:scale-95 text-white font-bold text-xs shadow-brand transition-all"
+            >
+              <Plus className="w-4 h-4 stroke-[3]" />
+              <span className="hidden sm:inline">Plan Trip</span>
+            </button>
+
+            {/* Logout / Return to Landing Page */}
+            <button
+              onClick={logout}
+              title="Log out and return to Landing Page"
+              className="p-2 rounded-xl bg-slate-100 hover:bg-rose-50 hover:text-rose-600 dark:bg-slate-800 dark:hover:bg-rose-950/40 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
 
             {/* Mobile Menu Toggle */}
             <button
@@ -231,22 +216,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Mobile Navigation Drawer */}
         {mobileMenuOpen && (
           <div className="md:hidden p-4 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 space-y-2 animate-fadeIn shadow-lg">
-            <button
-              onClick={() => {
-                setCurrentView('landing');
-                setMobileMenuOpen(false);
-              }}
-              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-                currentView === 'landing'
-                  ? 'bg-[#F2541B] text-white font-bold'
-                  : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
-              }`}
-            >
-              <Home className="w-4 h-4" />
-              <span>Landing Overview</span>
-            </button>
-
-            {appNavLinks.map(link => (
+            {navLinks.map(link => (
               <button
                 key={link.id}
                 onClick={() => {
@@ -281,6 +251,15 @@ export const Navbar: React.FC<NavbarProps> = ({
                 className="flex-1 py-2 text-center text-xs font-semibold text-[#F2541B] bg-orange-50 dark:bg-orange-950/30 rounded-xl"
               >
                 Switch Persona
+              </button>
+              <button
+                onClick={() => {
+                  logout();
+                  setMobileMenuOpen(false);
+                }}
+                className="py-2 px-3 text-center text-xs font-semibold text-rose-500 bg-rose-50 dark:bg-rose-950/30 rounded-xl"
+              >
+                Log Out
               </button>
             </div>
           </div>
