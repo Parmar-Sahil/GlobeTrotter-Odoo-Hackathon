@@ -139,6 +139,7 @@ export default function TripWorkspacePage({ params }: TripWorkspaceProps) {
               trip={trip}
               sections={sections}
               budgetSummary={budgetData}
+              onNavigateTab={setActiveTab}
             />
           )}
         </div>
