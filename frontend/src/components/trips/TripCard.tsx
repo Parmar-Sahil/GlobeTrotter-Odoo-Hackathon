@@ -24,13 +24,13 @@ export function TripCard({ trip, onDelete }: TripCardProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const fallbackImage =
-    "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800&auto=format&fit=crop&q=80";
+    "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800&auto=format&fit=crop&q=80";
 
   const statusColors = {
-    PLANNING: "bg-blue-50 text-blue-700 border-blue-200",
-    ONGOING: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    PLANNING: "bg-orange-50 text-[#7C2D12] border-orange-200",
+    ONGOING: "bg-emerald-50 text-emerald-800 border-emerald-200",
     COMPLETED: "bg-slate-100 text-slate-700 border-slate-200",
-    CANCELLED: "bg-rose-50 text-rose-700 border-rose-200",
+    CANCELLED: "bg-rose-50 text-rose-800 border-rose-200",
   };
 
   const statusLabel = {
@@ -43,24 +43,24 @@ export function TripCard({ trip, onDelete }: TripCardProps) {
   const destinationCount = trip.destinationCount ?? trip.sections?.length ?? 0;
 
   return (
-    <div className="group relative bg-white rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md transition-all duration-200 overflow-hidden flex flex-col">
+    <div className="group relative bg-white rounded-3xl border border-orange-100/90 shadow-xs hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col justify-between">
       {/* Cover Image Container */}
-      <div className="relative h-48 w-full overflow-hidden bg-slate-100">
+      <div className="relative h-48 w-full overflow-hidden bg-slate-900">
         <img
           src={trip.coverImage || fallbackImage}
           alt={trip.title}
-          className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+          className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
           loading="lazy"
           onError={(e) => {
             (e.target as HTMLImageElement).src = fallbackImage;
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
         {/* Status Badge */}
-        <div className="absolute top-3 left-3">
+        <div className="absolute top-3.5 left-3.5">
           <span
-            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border backdrop-blur-md shadow-xs ${
+            className={`inline-flex items-center px-3 py-0.5 rounded-full text-xs font-bold border backdrop-blur-md shadow-xs ${
               statusColors[trip.status] || statusColors.PLANNING
             }`}
           >
@@ -69,7 +69,7 @@ export function TripCard({ trip, onDelete }: TripCardProps) {
         </div>
 
         {/* Quick Menu */}
-        <div className="absolute top-3 right-3">
+        <div className="absolute top-3.5 right-3.5">
           <div className="relative">
             <button
               type="button"
@@ -78,7 +78,7 @@ export function TripCard({ trip, onDelete }: TripCardProps) {
                 e.stopPropagation();
                 setIsMenuOpen(!isMenuOpen);
               }}
-              className="p-1.5 rounded-full bg-black/40 text-white hover:bg-black/60 backdrop-blur-md transition-colors"
+              className="p-2 rounded-full bg-black/40 text-white hover:bg-black/60 backdrop-blur-md transition-colors"
               aria-label="Trip options"
             >
               <MoreVertical className="w-4 h-4" />
@@ -90,10 +90,10 @@ export function TripCard({ trip, onDelete }: TripCardProps) {
                   className="fixed inset-0 z-20"
                   onClick={() => setIsMenuOpen(false)}
                 />
-                <div className="absolute right-0 mt-1 w-36 bg-white rounded-xl shadow-lg border border-slate-100 py-1 z-30 text-xs">
+                <div className="absolute right-0 mt-1 w-36 bg-white rounded-2xl shadow-xl border border-orange-100 py-1.5 z-30 text-xs font-bold">
                   <Link
                     href={`/trips/${trip.id}`}
-                    className="flex items-center gap-2 px-3 py-1.5 text-slate-700 hover:bg-slate-50"
+                    className="flex items-center gap-2 px-3.5 py-2 text-slate-700 hover:bg-orange-50 hover:text-[#7C2D12]"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <Edit className="w-3.5 h-3.5 text-slate-400" />
@@ -107,7 +107,7 @@ export function TripCard({ trip, onDelete }: TripCardProps) {
                         setIsMenuOpen(false);
                         onDelete(trip.id);
                       }}
-                      className="w-full flex items-center gap-2 px-3 py-1.5 text-rose-600 hover:bg-rose-50 text-left"
+                      className="w-full flex items-center gap-2 px-3.5 py-2 text-rose-600 hover:bg-rose-50 text-left"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                       Delete
@@ -119,9 +119,9 @@ export function TripCard({ trip, onDelete }: TripCardProps) {
           </div>
         </div>
 
-        {/* Destination count badge on bottom of image */}
-        <div className="absolute bottom-3 left-3 flex items-center gap-1.5 text-xs text-white/90 font-medium">
-          <MapPin className="w-3.5 h-3.5 text-blue-400" />
+        {/* Destination count badge */}
+        <div className="absolute bottom-3 left-3 flex items-center gap-1.5 text-xs text-white font-bold drop-shadow-xs">
+          <MapPin className="w-3.5 h-3.5 text-[#F95724]" />
           <span>
             {destinationCount} {destinationCount === 1 ? "Stop" : "Stops"}
           </span>
@@ -132,12 +132,12 @@ export function TripCard({ trip, onDelete }: TripCardProps) {
       <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
         <div className="space-y-1.5">
           <Link href={`/trips/${trip.id}`}>
-            <h3 className="text-base font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-1">
+            <h3 className="text-base font-extrabold text-slate-900 group-hover:text-[#7C2D12] transition-colors line-clamp-1">
               {trip.title}
             </h3>
           </Link>
           {trip.description && (
-            <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+            <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed font-normal">
               {trip.description}
             </p>
           )}
@@ -145,17 +145,20 @@ export function TripCard({ trip, onDelete }: TripCardProps) {
 
         {/* Dates and Meta */}
         <div className="pt-3 border-t border-slate-100 space-y-2">
-          <div className="flex items-center gap-2 text-xs text-slate-600">
-            <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+          <div className="flex items-center gap-2 text-xs text-slate-600 font-medium">
+            <Calendar className="w-3.5 h-3.5 text-[#F95724] shrink-0" />
             <span>
-              {formatDate(trip.startDate)} - {formatDate(trip.endDate)}
+              {formatDate(trip.startDate)} — {formatDate(trip.endDate)}
             </span>
           </div>
 
           <div className="flex items-center justify-between pt-2">
             {trip.budgetLimit ? (
-              <span className="text-xs font-semibold text-slate-700">
-                Budget: <span className="text-blue-600">{formatCurrency(trip.budgetLimit)}</span>
+              <span className="text-xs font-bold text-slate-700">
+                Budget:{" "}
+                <span className="text-[#7C2D12]">
+                  {formatCurrency(trip.budgetLimit)}
+                </span>
               </span>
             ) : (
               <span className="text-xs text-slate-400">No budget set</span>
@@ -163,7 +166,7 @@ export function TripCard({ trip, onDelete }: TripCardProps) {
 
             <Link
               href={`/trips/${trip.id}`}
-              className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors group-hover:translate-x-0.5"
+              className="inline-flex items-center gap-1 text-xs font-bold text-[#7C2D12] hover:text-[#9A3412] transition-colors group-hover:translate-x-0.5"
             >
               Workspace <ArrowRight className="w-3.5 h-3.5" />
             </Link>

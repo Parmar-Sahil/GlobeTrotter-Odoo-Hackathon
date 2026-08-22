@@ -22,7 +22,7 @@ export function TripTabs({
   sectionsCount = 0,
 }: TripTabsProps) {
   const tabs = [
-    { id: "overview" as TripTabType, label: "Overview", icon: FileText },
+    { id: "overview" as TripTabType, label: "Trip Details", icon: FileText },
     {
       id: "itinerary" as TripTabType,
       label: "Itinerary Builder",
@@ -34,7 +34,7 @@ export function TripTabs({
   ];
 
   return (
-    <div className="flex items-center gap-2 border-b border-slate-200 overflow-x-auto scrollbar-none pb-px">
+    <div className="flex items-center gap-2 border-b border-orange-200/80 overflow-x-auto scrollbar-none pb-px">
       {tabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = activeTab === tab.id;
@@ -43,20 +43,24 @@ export function TripTabs({
             key={tab.id}
             type="button"
             onClick={() => onTabChange(tab.id)}
-            className={`flex items-center gap-2 px-5 py-3.5 border-b-2 text-sm font-semibold whitespace-nowrap transition-all ${
+            className={`flex items-center gap-2 px-5 py-3.5 border-b-2 text-xs sm:text-sm font-bold whitespace-nowrap transition-all ${
               isActive
-                ? "border-blue-600 text-blue-600"
-                : "border-transparent text-slate-500 hover:text-slate-900 hover:border-slate-300"
+                ? "border-[#7C2D12] text-[#7C2D12]"
+                : "border-transparent text-slate-500 hover:text-[#7C2D12] hover:border-orange-200"
             }`}
           >
-            <Icon className={`w-4 h-4 ${isActive ? "text-blue-600" : "text-slate-400"}`} />
+            <Icon
+              className={`w-4 h-4 ${
+                isActive ? "text-[#F95724]" : "text-slate-400"
+              }`}
+            />
             <span>{tab.label}</span>
             {tab.badge !== undefined && (
               <span
-                className={`px-2 py-0.5 rounded-full text-xs font-bold ${
+                className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
                   isActive
-                    ? "bg-blue-100 text-blue-700"
-                    : "bg-slate-100 text-slate-600"
+                    ? "bg-[#F95724] text-white"
+                    : "bg-orange-100 text-slate-700"
                 }`}
               >
                 {tab.badge}

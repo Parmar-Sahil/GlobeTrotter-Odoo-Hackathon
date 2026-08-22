@@ -25,7 +25,7 @@ export function TripHeader({ trip, onShareClick }: TripHeaderProps) {
   const [copied, setCopied] = useState(false);
 
   const fallbackImage =
-    "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1200&auto=format&fit=crop&q=80";
+    "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=1200&auto=format&fit=crop&q=80";
 
   const handleShare = () => {
     if (onShareClick) {
@@ -33,7 +33,7 @@ export function TripHeader({ trip, onShareClick }: TripHeaderProps) {
       return;
     }
 
-    const shareUrl = `${window.location.origin}/shared/${trip.id}`;
+    const shareUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/shared/${trip.id}`;
     navigator.clipboard.writeText(shareUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
@@ -42,7 +42,7 @@ export function TripHeader({ trip, onShareClick }: TripHeaderProps) {
   const destinationCount = trip.destinationCount ?? trip.sections?.length ?? 0;
 
   return (
-    <div className="relative rounded-3xl overflow-hidden shadow-lg border border-slate-200 bg-slate-900 text-white">
+    <div className="relative rounded-3xl overflow-hidden shadow-xl shadow-orange-950/10 border border-orange-100 bg-[#2A0E06] text-white">
       {/* Cover Image Background */}
       <div className="absolute inset-0 h-full w-full">
         <img
@@ -53,7 +53,7 @@ export function TripHeader({ trip, onShareClick }: TripHeaderProps) {
             (e.target as HTMLImageElement).src = fallbackImage;
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/60 to-black/30" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#2A0E06] via-[#2A0E06]/60 to-black/30" />
       </div>
 
       <div className="relative z-10 p-6 sm:p-8 lg:p-10 space-y-6">
@@ -61,7 +61,7 @@ export function TripHeader({ trip, onShareClick }: TripHeaderProps) {
         <div className="flex items-center justify-between">
           <Link
             href="/trips"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md text-xs font-semibold text-white transition-colors"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md text-xs font-bold text-white transition-colors"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             All Trips
@@ -71,7 +71,7 @@ export function TripHeader({ trip, onShareClick }: TripHeaderProps) {
             <button
               type="button"
               onClick={handleShare}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white/15 hover:bg-white/25 backdrop-blur-md text-xs font-semibold text-white border border-white/20 transition-all shadow-xs"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur-md text-xs font-bold text-white border border-white/20 transition-all shadow-xs"
             >
               {copied ? (
                 <>
@@ -80,7 +80,7 @@ export function TripHeader({ trip, onShareClick }: TripHeaderProps) {
                 </>
               ) : (
                 <>
-                  <Share2 className="w-3.5 h-3.5 text-blue-300" />
+                  <Share2 className="w-3.5 h-3.5 text-orange-300" />
                   Share Itinerary
                 </>
               )}
@@ -91,14 +91,14 @@ export function TripHeader({ trip, onShareClick }: TripHeaderProps) {
         {/* Title and Meta */}
         <div className="space-y-3">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-blue-500/30 text-blue-200 border border-blue-400/30 text-xs font-semibold backdrop-blur-md">
+            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-orange-500/20 text-orange-300 border border-orange-500/30 text-xs font-bold backdrop-blur-md">
               <Sparkles className="w-3 h-3 text-amber-300" />
               {trip.status}
             </span>
             <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white/10 text-slate-200 border border-white/10 text-xs font-medium backdrop-blur-md">
               {trip.visibility === "PUBLIC" ? (
                 <>
-                  <Globe className="w-3 h-3 text-blue-400" /> Public
+                  <Globe className="w-3 h-3 text-orange-400" /> Public
                 </>
               ) : (
                 <>
@@ -108,12 +108,12 @@ export function TripHeader({ trip, onShareClick }: TripHeaderProps) {
             </span>
           </div>
 
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-white drop-shadow-sm">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-white drop-shadow-xs">
             {trip.title}
           </h1>
 
           {trip.description && (
-            <p className="text-sm sm:text-base text-slate-300 max-w-3xl leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-300 max-w-3xl leading-relaxed font-normal">
               {trip.description}
             </p>
           )}
@@ -122,14 +122,14 @@ export function TripHeader({ trip, onShareClick }: TripHeaderProps) {
         {/* Info Highlights Bar */}
         <div className="flex flex-wrap items-center gap-6 pt-4 border-t border-white/15 text-xs text-slate-200">
           <div className="flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-blue-400" />
+            <Calendar className="w-4 h-4 text-[#F95724]" />
             <span className="font-semibold text-white">
-              {formatDate(trip.startDate)} - {formatDate(trip.endDate)}
+              {formatDate(trip.startDate)} — {formatDate(trip.endDate)}
             </span>
           </div>
 
           <div className="flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-emerald-400" />
+            <MapPin className="w-4 h-4 text-orange-300" />
             <span>
               <strong className="text-white">{destinationCount}</strong> {destinationCount === 1 ? "Stop" : "Stops"}
             </span>
@@ -137,7 +137,7 @@ export function TripHeader({ trip, onShareClick }: TripHeaderProps) {
 
           {trip.budgetLimit && (
             <div className="flex items-center gap-2">
-              <DollarSign className="w-4 h-4 text-amber-400" />
+              <DollarSign className="w-4 h-4 text-amber-300" />
               <span>
                 Target Budget:{" "}
                 <strong className="text-white">

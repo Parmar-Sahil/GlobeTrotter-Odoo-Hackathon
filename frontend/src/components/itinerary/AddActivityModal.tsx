@@ -102,34 +102,34 @@ export function AddActivityModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-150">
+      <div className="bg-white rounded-3xl border border-orange-100 shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-150">
         {/* Header */}
-        <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+        <div className="p-6 border-b border-orange-100/70 flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-bold text-slate-900">
+            <h3 className="text-lg font-extrabold text-slate-900">
               Add Activity to Itinerary
             </h3>
             <p className="text-xs text-slate-500">
-              {stopTitle ? `Destination: ${stopTitle}` : "Schedule an experience"}
+              {stopTitle ? `Destination Stop: ${stopTitle}` : "Schedule an experience"}
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+            className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-orange-50 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Tab Toggle */}
-        <div className="px-6 pt-3 flex gap-2 border-b border-slate-100 bg-slate-50/60">
+        <div className="px-6 pt-3 flex gap-2 border-b border-orange-100/70 bg-[#FAF7F5]">
           <button
             type="button"
             onClick={() => setTab("curated")}
             className={`px-4 py-2.5 text-xs font-bold border-b-2 transition-all ${
               tab === "curated"
-                ? "border-blue-600 text-blue-600"
+                ? "border-[#7C2D12] text-[#7C2D12]"
                 : "border-transparent text-slate-500 hover:text-slate-900"
             }`}
           >
@@ -140,7 +140,7 @@ export function AddActivityModal({
             onClick={() => setTab("custom")}
             className={`px-4 py-2.5 text-xs font-bold border-b-2 transition-all ${
               tab === "custom"
-                ? "border-blue-600 text-blue-600"
+                ? "border-[#7C2D12] text-[#7C2D12]"
                 : "border-transparent text-slate-500 hover:text-slate-900"
             }`}
           >
@@ -160,7 +160,7 @@ export function AddActivityModal({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search activities by name or category..."
-                  className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  className="w-full pl-9 pr-4 py-2.5 bg-[#FAF7F5] border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-orange-500/20 focus:border-[#F95724]"
                 />
               </div>
 
@@ -178,7 +178,7 @@ export function AddActivityModal({
                   {curatedActivities.map((act) => (
                     <div
                       key={act.id}
-                      className="flex items-center justify-between p-3.5 rounded-2xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/30 transition-all gap-4"
+                      className="flex items-center justify-between p-3.5 rounded-2xl border border-slate-200 hover:border-[#F95724] hover:bg-orange-50/30 transition-all gap-4"
                     >
                       <div className="flex items-center gap-3 min-w-0">
                         {act.imageUrl && (
@@ -192,13 +192,13 @@ export function AddActivityModal({
                           <h4 className="text-sm font-bold text-slate-900 truncate">
                             {act.title}
                           </h4>
-                          <p className="text-xs text-slate-500 line-clamp-1">
+                          <p className="text-xs text-slate-500 line-clamp-1 font-normal">
                             {act.description}
                           </p>
                           <div className="flex items-center gap-3 text-[11px] text-slate-400 mt-1">
                             <span>{act.durationMinutes} mins</span>
                             <span>•</span>
-                            <span className="font-semibold text-slate-700">
+                            <span className="font-bold text-[#7C2D12]">
                               {act.estimatedCost > 0
                                 ? formatCurrency(act.estimatedCost)
                                 : "Free"}
@@ -211,7 +211,7 @@ export function AddActivityModal({
                         type="button"
                         disabled={isSubmitting}
                         onClick={() => handleAddCurated(act)}
-                        className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shrink-0 shadow-xs transition-colors"
+                        className="px-3.5 py-1.5 rounded-full bg-[#7C2D12] hover:bg-[#9A3412] text-white text-xs font-bold shrink-0 shadow-xs transition-colors"
                       >
                         + Add
                       </button>
@@ -220,14 +220,14 @@ export function AddActivityModal({
                 </div>
               ) : (
                 <div className="text-center py-10 space-y-2">
-                  <Sparkles className="w-8 h-8 text-slate-300 mx-auto" />
+                  <Sparkles className="w-8 h-8 text-orange-300 mx-auto" />
                   <p className="text-xs text-slate-500">
                     No curated activities found for this destination query.
                   </p>
                   <button
                     type="button"
                     onClick={() => setTab("custom")}
-                    className="text-xs font-bold text-blue-600 hover:underline"
+                    className="text-xs font-bold text-[#7C2D12] hover:underline"
                   >
                     Create a custom activity instead
                   </button>
@@ -245,8 +245,8 @@ export function AddActivityModal({
                   required
                   value={customTitle}
                   onChange={(e) => setCustomTitle(e.target.value)}
-                  placeholder="e.g. Louvre Guided Tour & Mona Lisa"
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  placeholder="e.g. Fushimi Inari Sunrise Walk & Tea"
+                  className="w-full px-4 py-2.5 bg-[#FAF7F5] border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-orange-500/20 focus:border-[#F95724]"
                 />
               </div>
 
@@ -259,7 +259,7 @@ export function AddActivityModal({
                   value={customDescription}
                   onChange={(e) => setCustomDescription(e.target.value)}
                   placeholder="Meeting point, ticket details, or highlights..."
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  className="w-full px-4 py-2.5 bg-[#FAF7F5] border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-orange-500/20 focus:border-[#F95724]"
                 />
               </div>
 
@@ -273,7 +273,7 @@ export function AddActivityModal({
                     onChange={(e) =>
                       setCustomCategory(e.target.value as ActivityCategory)
                     }
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900"
+                    className="w-full px-3 py-2 bg-[#FAF7F5] border border-slate-200 rounded-xl text-xs text-slate-900 appearance-none cursor-pointer"
                   >
                     <option value="SIGHTSEEING">Sightseeing</option>
                     <option value="FOOD_DRINK">Food & Drink</option>
@@ -294,7 +294,7 @@ export function AddActivityModal({
                     type="time"
                     value={customStartTime}
                     onChange={(e) => setCustomStartTime(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900"
+                    className="w-full px-3 py-2 bg-[#FAF7F5] border border-slate-200 rounded-xl text-xs text-slate-900"
                   />
                 </div>
 
@@ -306,20 +306,20 @@ export function AddActivityModal({
                     type="number"
                     value={customDuration}
                     onChange={(e) => setCustomDuration(Number(e.target.value))}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900"
+                    className="w-full px-3 py-2 bg-[#FAF7F5] border border-slate-200 rounded-xl text-xs text-slate-900"
                   />
                 </div>
 
                 <div>
                   <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
-                    Cost ($)
+                    Cost (₹)
                   </label>
                   <input
                     type="number"
-                    step="0.01"
+                    step="1"
                     value={customCost}
                     onChange={(e) => setCustomCost(Number(e.target.value))}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900"
+                    className="w-full px-3 py-2 bg-[#FAF7F5] border border-slate-200 rounded-xl text-xs text-slate-900"
                   />
                 </div>
               </div>
@@ -328,14 +328,14 @@ export function AddActivityModal({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl"
+                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-full"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting || !customTitle.trim()}
-                  className="px-6 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-xs disabled:opacity-50"
+                  className="px-6 py-2 text-xs font-bold text-white bg-[#7C2D12] hover:bg-[#9A3412] rounded-full shadow-xs disabled:opacity-50"
                 >
                   {isSubmitting ? "Adding..." : "Add to Stop"}
                 </button>
