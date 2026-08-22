@@ -73,6 +73,46 @@ export const addItem = async (req: AuthenticatedRequest, res: Response, next: Ne
   }
 };
 
+export const updateItem = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.user!.userId;
+    const item = await TripFacade.updateItineraryItem(req.params.itemId, userId, req.body);
+    return sendSuccess(res, item, 'Itinerary item updated successfully');
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const deleteItem = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.user!.userId;
+    const result = await TripFacade.deleteItineraryItem(req.params.itemId, userId);
+    return sendSuccess(res, result, 'Itinerary item deleted successfully');
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const updateSection = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.user!.userId;
+    const section = await TripFacade.updateTripSection(req.params.sectionId, userId, req.body);
+    return sendSuccess(res, section, 'Section updated successfully');
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const deleteSection = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.user!.userId;
+    const result = await TripFacade.deleteTripSection(req.params.sectionId, userId);
+    return sendSuccess(res, result, 'Section deleted successfully');
+  } catch (error) {
+    return next(error);
+  }
+};
+
 export const getItinerary = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const itinerary = await TripFacade.getTripItinerary(req.params.id);

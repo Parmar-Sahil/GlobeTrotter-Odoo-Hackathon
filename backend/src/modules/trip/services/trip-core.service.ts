@@ -167,11 +167,12 @@ export const getTripById = async (tripId: string, userId?: string) => {
     },
   });
 
-  if (!trip || trip.userId === undefined) {
+  if (!trip) {
     throw new Error('Trip not found');
   }
 
-  if (trip.visibility === 'private' && trip.userId !== userId) {
+  const isPrivate = !trip.visibility || trip.visibility.toLowerCase() === 'private';
+  if (isPrivate && (!userId || trip.userId !== userId)) {
     throw new Error('Access forbidden: Private trip');
   }
 

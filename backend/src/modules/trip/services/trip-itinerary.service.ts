@@ -252,3 +252,129 @@ export const getBudgetSummary = async (tripId: string) => {
     dailyBudgets: trip.dailyBudgets,
   };
 };
+
+export const updateItineraryItem = async (
+  itemId: string,
+  userId: string,
+  data: {
+    title?: string;
+    description?: string;
+    itemType?: string;
+    category?: string;
+    cost?: number;
+    costEstimate?: number;
+    startTime?: string;
+    endTime?: string;
+    durationMinutes?: number;
+    orderIndex?: number;
+    stopId?: string;
+  }
+) => {
+  const item = await prisma.itineraryItem.findUnique({
+    where: { id: itemId },
+    include: {
+      trip: { select: { userId: true } },
+    },
+  });
+
+  if (!item || item.trip.userId !== userId) {
+    throw new Error('Access forbidden or item not found');
+  }
+
+  return await prisma.itineraryItem.update({
+    where: { id: itemId },
+    data: {
+      title: data.title !== undefined ? data.title : undefined,
+      description: data.description !== undefined ? data.description : undefined,
+      itemType: data.itemType || data.category || undefined,
+      costEstimate:
+        data.cost !== undefined
+          ? data.cost
+          : data.costEstimate !== undefined
+          ? data.costEstimate
+          : undefined,
+      startTime: data.startTime !== undefined ? data.startTime : undefined,
+      endTime: data.endTime !== undefined ? data.endTime : undefined,
+      orderIndex: data.orderIndex !== undefined ? data.orderIndex : undefined,
+      stopId: data.stopId !== undefined ? data.stopId : undefined,
+    },
+    include: {
+      activity: true,
+    },
+  });
+};
+
+export const deleteItineraryItem = async (itemId: string, userId: string) => {
+  const item = await prisma.itineraryItem.findUnique({
+    where: { id: itemId },
+    include: {
+      trip: { select: { userId: true } },
+    },
+  });
+
+  if (!item || item.trip.userId !== userId) {
+    throw new Error('Access forbidden or item not found');
+  }
+
+  return await prisma.itineraryItem.delete({
+    where: { id: itemId },
+  });
+};
+
+export const updateTripSection = async (
+  sectionId: string,
+  userId: string,
+  data: {
+    title?: string;
+    notes?: string;
+    startDate?: string;
+    endDate?: string;
+    stopOrder?: number;
+  }
+) => {
+  const stop = await prisma.tripStop.findUnique({
+    where: { id: sectionId },
+    include: {
+      trip: { select: { userId: true } },
+    },
+  });
+
+  if (!stop || stop.trip.userId !== userId) {
+    throw new Error('Access forbidden or section not found');
+  }
+
+  return await prisma.tripStop.update({
+    where: { id: sectionId },
+    data: {
+      notes: data.notes || data.title || undefined,
+      startDate: data.startDate ? new Date(data.startDate) : undefined,
+      endDate: data.endDate ? new Date(data.endDate) : undefined,
+      stopOrder: data.stopOrder !== undefined ? data.stopOrder : undefined,
+    },
+    include: {
+      city: true,
+    },
+  });
+};
+
+export const deleteTripSection = async (sectionId: string, userId: string) => {
+  const stop = await prisma.tripStop.findUnique({
+    where: { id: sectionId },
+    include: {
+      trip: { select: { userId: true } },
+    },
+  });
+
+  if (!stop || stop.trip.userId !== userId) {
+    throw new Error('Access forbidden or section not found');
+  }
+
+  // Delete attached itinerary items first
+  await prisma.itineraryItem.deleteMany({
+    where: { stopId: sectionId },
+  });
+
+  return await prisma.tripStop.delete({
+    where: { id: sectionId },
+  });
+};
