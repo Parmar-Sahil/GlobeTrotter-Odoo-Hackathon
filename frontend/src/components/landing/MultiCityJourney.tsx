@@ -47,16 +47,13 @@ export function MultiCityJourney() {
         {/* SVG Route Connector Line (Desktop) */}
         <div className="hidden lg:block absolute top-[120px] left-[10%] right-[10%] h-1 pointer-events-none z-0">
           <svg className="w-full h-12 overflow-visible">
-            <motion.path
+            <path
               d="M 0,0 C 200,40 600,-40 850,0"
               fill="none"
               stroke="#F95724"
               strokeWidth="3"
               strokeDasharray="6 6"
-              initial={shouldReduceMotion ? { pathLength: 1 } : { pathLength: 0 }}
-              whileInView={{ pathLength: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 1.5, ease: "easeInOut" }}
+              className="opacity-70"
             />
           </svg>
         </div>

@@ -94,12 +94,7 @@ export function AuthLayout({
 
         {/* Form Container Card */}
         <div className="max-w-md w-full mx-auto my-auto py-4 sm:py-6">
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, ease: [0.21, 0.47, 0.32, 0.98] }}
-            className="bg-white rounded-3xl border border-orange-100/80 shadow-xl shadow-orange-950/5 p-6 sm:p-8 space-y-6"
-          >
+          <div className="bg-white rounded-3xl border border-orange-100/80 shadow-xl shadow-orange-950/5 p-6 sm:p-8 space-y-6">
             {/* Form Header */}
             <div className="text-center space-y-2">
               <div className="w-14 h-14 rounded-2xl bg-orange-50 text-[#F95724] flex items-center justify-center mx-auto shadow-inner mb-3">
@@ -117,7 +112,7 @@ export function AuthLayout({
 
             {/* Form Content */}
             {children}
-          </motion.div>
+          </div>
         </div>
 
         {/* Footer Note */}
