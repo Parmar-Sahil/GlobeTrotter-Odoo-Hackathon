@@ -63,13 +63,16 @@ export default function SignupPage() {
         lastName,
       });
 
-      router.push("/dashboard");
+      router.push("/");
     } catch (err: any) {
-      setServerError(
-        err.response?.data?.message ||
-          err.message ||
-          "Registration failed. Please check your details and try again."
-      );
+      const rawMsg = err.response?.data?.message || err.message || "";
+      if (rawMsg.includes("Can't reach database server") || rawMsg.includes("localhost:5432")) {
+        setServerError("Database server is offline. Please make sure PostgreSQL is running on port 5432.");
+      } else {
+        setServerError(
+          rawMsg || "Registration failed. Please check your details and try again."
+        );
+      }
     }
   };
 

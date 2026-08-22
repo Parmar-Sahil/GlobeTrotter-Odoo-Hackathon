@@ -36,13 +36,16 @@ export default function LoginPage() {
         usernameOrEmail: data.email,
         password: data.password,
       });
-      router.push("/dashboard");
+      router.push("/");
     } catch (err: any) {
-      setServerError(
-        err.response?.data?.message ||
-          err.message ||
-          "Invalid email or password. Please verify your credentials."
-      );
+      const rawMsg = err.response?.data?.message || err.message || "";
+      if (rawMsg.includes("Can't reach database server") || rawMsg.includes("localhost:5432")) {
+        setServerError("Database server is offline. Please make sure PostgreSQL is running on port 5432.");
+      } else {
+        setServerError(
+          rawMsg || "Invalid email or password. Please verify your credentials."
+        );
+      }
     }
   };
 
