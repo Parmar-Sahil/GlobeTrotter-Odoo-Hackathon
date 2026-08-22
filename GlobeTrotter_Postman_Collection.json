@@ -1,0 +1,688 @@
+{
+  "info": {
+    "_postman_id": "globetrotter-api-collection-2026",
+    "name": "GlobeTrotter API Collection",
+    "description": "Complete REST API Collection for GlobeTrotter Travel Planning Application (Odoo Hackathon). Includes all endpoints for Screens 1 through 12.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "tripId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "cityId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "sectionId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "postId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "Register User (Screen 2)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"alex_explorer\",\n  \"email\": \"alex@example.com\",\n  \"password\": \"password123\",\n  \"firstName\": \"Alex\",\n  \"lastName\": \"Morgan\",\n  \"city\": \"San Francisco\",\n  \"country\": \"USA\",\n  \"bio\": \"Travel enthusiast exploring world capitals.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login User (Screen 1)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usernameOrEmail\": \"admin@globetrotter.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Profile (Screen 7)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Profile (Screen 7)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"city\": \"Tokyo\",\n  \"country\": \"Japan\",\n  \"bio\": \"Now exploring Asia!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "profile"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Destinations & Cities",
+      "item": [
+        {
+          "name": "Top Regional Selections (Screen 3)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/destinations/top-regional",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "destinations",
+                "top-regional"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search Destinations (Screen 3, 8)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/destinations/search?search=Paris&region=Europe&sortBy=popularityScore&sortOrder=desc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "destinations",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "Paris"
+                },
+                {
+                  "key": "region",
+                  "value": "Europe"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "popularityScore"
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get City Suggestions (Screen 4)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/destinations/{{cityId}}/suggestions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "destinations",
+                "{{cityId}}",
+                "suggestions"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Activities",
+      "item": [
+        {
+          "name": "Search & Filter Activities (Screen 8)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/activities/search?city=Paris&sortBy=popularityScore&sortOrder=desc&groupBy=category",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "activities",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "city",
+                  "value": "Paris"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "popularityScore"
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc"
+                },
+                {
+                  "key": "groupBy",
+                  "value": "category"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Trips",
+      "item": [
+        {
+          "name": "Create New Trip (Screen 4)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Paris Summer Vacation\",\n  \"cityId\": \"{{cityId}}\",\n  \"startDate\": \"2026-09-10\",\n  \"endDate\": \"2026-09-17\",\n  \"totalBudget\": 2500.0,\n  \"description\": \"Romantic getaway with Seine river tours\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/trips",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "trips"
+              ]
+            }
+          }
+        },
+        {
+          "name": "User Trip Listing (Screen 6)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/trips/my-trips?status=upcoming",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "trips",
+                "my-trips"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "upcoming"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Trip Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/trips/{{tripId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "trips",
+                "{{tripId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Itinerary & Budget",
+      "item": [
+        {
+          "name": "Add Section/Stop to Trip (Screen 5)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Section 1: Sightseeing\",\n  \"cityId\": \"{{cityId}}\",\n  \"startDate\": \"2026-09-10\",\n  \"endDate\": \"2026-09-12\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/trips/{{tripId}}/sections",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "trips",
+                "{{tripId}}",
+                "sections"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Add Itinerary Item (Screen 5)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Eiffel Tower Guided Summit Visit\",\n  \"itemType\": \"activity\",\n  \"costEstimate\": 75.0,\n  \"startTime\": \"10:00 AM\",\n  \"endTime\": \"12:30 PM\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/trips/sections/{{sectionId}}/items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "trips",
+                "sections",
+                "{{sectionId}}",
+                "items"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Itinerary Timeline (Screen 9)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/trips/{{tripId}}/itinerary",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "trips",
+                "{{tripId}}",
+                "itinerary"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Budget Summary (Screen 9)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/trips/{{tripId}}/budget-summary",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "trips",
+                "{{tripId}}",
+                "budget-summary"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Calendar View",
+      "item": [
+        {
+          "name": "Get Calendar Events (Screen 11)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/trips/calendar?year=2026&month=9",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "trips",
+                "calendar"
+              ],
+              "query": [
+                {
+                  "key": "year",
+                  "value": "2026"
+                },
+                {
+                  "key": "month",
+                  "value": "9"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Community Feed",
+      "item": [
+        {
+          "name": "Get Posts Feed (Screen 10)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/community/posts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "community",
+                "posts"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Review Post (Screen 10)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tripId\": \"{{tripId}}\",\n  \"title\": \"Tandem Paragliding in Paris\",\n  \"body\": \"Amazing flight above Seine valley!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/community/posts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "community",
+                "posts"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Toggle Post Like (Screen 10)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/community/posts/{{postId}}/like",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "community",
+                "posts",
+                "{{postId}}",
+                "like"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Add Post Comment (Screen 10)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Awesome review! Added to my itinerary.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/community/posts/{{postId}}/comments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "community",
+                "posts",
+                "{{postId}}",
+                "comments"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Admin & Analytics",
+      "item": [
+        {
+          "name": "Get Users List (Screen 12)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Popular Cities Analytics (Screen 12)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/analytics/popular-cities",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "analytics",
+                "popular-cities"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Popular Activities Analytics (Screen 12)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/analytics/popular-activities",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "analytics",
+                "popular-activities"
+              ]
+            }
+          }
+        },
+        {
+          "name": "User Trends Analytics (Screen 12)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/analytics/user-trends",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "analytics",
+                "user-trends"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

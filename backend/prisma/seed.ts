@@ -1,29 +1,41 @@
 import { PrismaClient } from '@prisma/client';
-import { Role, TripStatus, ActivityCategory } from '../src/types/enums';
+import {
+  UserRole,
+  UserStatus,
+  TripStatus,
+  TripVisibility,
+  ItineraryItemType,
+  PostStatus,
+  ShareMode,
+  SearchType,
+} from '../src/types/enums';
 import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Starting GlobeTrotter database seeding...');
+  console.log('🌱 Seeding GlobeTrotter 14-Table Database...');
 
-  // 1. Create Users
   const passwordHash = await bcrypt.hash('password123', 10);
 
+  // 1. Users
   const admin = await prisma.user.upsert({
     where: { email: 'admin@globetrotter.com' },
     update: {},
     create: {
-      email: 'admin@globetrotter.com',
       username: 'admin',
+      email: 'admin@globetrotter.com',
       passwordHash,
+      role: UserRole.ADMIN,
+      status: UserStatus.ACTIVE,
       firstName: 'Admin',
       lastName: 'User',
-      role: Role.ADMIN,
       city: 'Paris',
       country: 'France',
-      avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400',
-      bio: 'GlobeTrotter Administrator & Head Travel Plan Curator',
+      countryCode: 'FR',
+      bio: 'Head Travel Curator at GlobeTrotter',
+      profilePhotoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400',
+      isEmailVerified: true,
     },
   });
 
@@ -31,16 +43,19 @@ async function main() {
     where: { email: 'john.doe@example.com' },
     update: {},
     create: {
-      email: 'john.doe@example.com',
       username: 'johndoe',
+      email: 'john.doe@example.com',
       passwordHash,
+      role: UserRole.USER,
+      status: UserStatus.ACTIVE,
       firstName: 'John',
       lastName: 'Doe',
-      role: Role.USER,
       city: 'New York',
       country: 'USA',
-      avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
-      bio: 'Avid explorer & photography enthusiast!',
+      countryCode: 'US',
+      bio: 'Travel enthusiast & landscape photographer.',
+      profilePhotoUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
+      isEmailVerified: true,
     },
   });
 
@@ -48,269 +63,257 @@ async function main() {
     where: { email: 'jane.smith@example.com' },
     update: {},
     create: {
-      email: 'jane.smith@example.com',
       username: 'janesmith',
+      email: 'jane.smith@example.com',
       passwordHash,
+      role: UserRole.USER,
+      status: UserStatus.ACTIVE,
       firstName: 'Jane',
       lastName: 'Smith',
-      role: Role.USER,
       city: 'Tokyo',
       country: 'Japan',
-      avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400',
-      bio: 'Foodie & culture lover travelling the globe.',
+      countryCode: 'JP',
+      bio: 'Culture explorer & foodie travel blogger.',
+      profilePhotoUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400',
+      isEmailVerified: true,
     },
   });
 
-  console.log('✅ Users seeded successfully');
+  console.log('✅ Users seeded');
 
-  // 2. Create Destinations
-  const paris = await prisma.destination.upsert({
-    where: { name: 'Paris' },
+  // 2. Cities
+  const paris = await prisma.city.upsert({
+    where: { name_countryCode: { name: 'Paris', countryCode: 'FR' } },
     update: {},
     create: {
       name: 'Paris',
+      countryCode: 'FR',
       country: 'France',
       region: 'Europe',
-      description: 'The City of Light, world famous for romance, art, culture, and iconic architecture.',
+      costIndex: 85.5,
+      popularityScore: 98.4,
+      description: 'The City of Light, world famous for art, fashion, gastronomy and culture.',
       imageUrl: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800',
-      bannerUrl: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=1200',
-      isPopular: true,
-      rating: 4.9,
-      visitCount: 1540,
+      latitude: 48.8566,
+      longitude: 2.3522,
+      timezone: 'Europe/Paris',
     },
   });
 
-  const nyc = await prisma.destination.upsert({
-    where: { name: 'New York City' },
+  const nyc = await prisma.city.upsert({
+    where: { name_countryCode: { name: 'New York City', countryCode: 'US' } },
     update: {},
     create: {
       name: 'New York City',
+      countryCode: 'US',
       country: 'USA',
       region: 'North America',
-      description: 'The Big Apple, featuring breathtaking skyscrapers, Broadway shows, and vibrant nightlife.',
+      costIndex: 92.0,
+      popularityScore: 96.2,
+      description: 'The Big Apple: home of skyscrapers, Broadway, Central Park and iconic museums.',
       imageUrl: 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=800',
-      bannerUrl: 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=1200',
-      isPopular: true,
-      rating: 4.8,
-      visitCount: 2310,
+      latitude: 40.7128,
+      longitude: -74.006,
+      timezone: 'America/New_York',
     },
   });
 
-  const tokyo = await prisma.destination.upsert({
-    where: { name: 'Tokyo' },
+  const tokyo = await prisma.city.upsert({
+    where: { name_countryCode: { name: 'Tokyo', countryCode: 'JP' } },
     update: {},
     create: {
       name: 'Tokyo',
+      countryCode: 'JP',
       country: 'Japan',
       region: 'Asia',
-      description: 'A dazzling blend of futuristic technology, rich ancient temples, and exquisite cuisine.',
+      costIndex: 88.0,
+      popularityScore: 99.1,
+      description: 'A futuristic metropolis combining neon skyscrapers with ancient shinto shrines.',
       imageUrl: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800',
-      bannerUrl: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=1200',
-      isPopular: true,
-      rating: 4.95,
-      visitCount: 3100,
+      latitude: 35.6762,
+      longitude: 139.6503,
+      timezone: 'Asia/Tokyo',
     },
   });
 
-  const bali = await prisma.destination.upsert({
-    where: { name: 'Bali' },
+  console.log('✅ Cities seeded');
+
+  // 3. Saved Destinations
+  await prisma.savedDestination.upsert({
+    where: { userId_cityId: { userId: john.id, cityId: paris.id } },
     update: {},
-    create: {
-      name: 'Bali',
-      country: 'Indonesia',
-      region: 'Asia',
-      description: 'Tropical paradise featuring serene beaches, volcanic mountains, and lush rice terraces.',
-      imageUrl: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=800',
-      isPopular: true,
-      rating: 4.85,
-      visitCount: 1890,
-    },
+    create: { userId: john.id, cityId: paris.id },
   });
 
-  console.log('✅ Destinations seeded successfully');
-
-  // 3. Create Activities
-  const paragliding = await prisma.activity.create({
-    data: {
-      destinationId: paris.id,
-      title: 'Paragliding over Seine Valley',
-      category: ActivityCategory.ADVENTURE,
-      description: 'Tandem paragliding experience with certified flight instructors providing panoramic views.',
-      imageUrl: 'https://images.unsplash.com/photo-1512555928601-e3feed426f28?w=800',
-      estimatedPrice: 180.0,
-      estimatedDurationHours: 3.0,
-      rating: 4.9,
-      isPopular: true,
-    },
-  });
-
+  // 4. Activities
   const eiffelTour = await prisma.activity.create({
     data: {
-      destinationId: paris.id,
-      title: 'Eiffel Tower Guided Summit Visit',
-      category: ActivityCategory.SIGHTSEEING,
-      description: 'Skip-the-line elevator access to the summit with expert local guide.',
+      cityId: paris.id,
+      name: 'Eiffel Tower Guided Summit Visit',
+      description: 'Skip-the-line elevator access with expert guide.',
+      category: ItineraryItemType.ACTIVITY,
+      estimatedCost: 75.0,
+      durationMinutes: 150,
+      address: 'Champ de Mars, 5 Avenue Anatole France, 75007 Paris',
       imageUrl: 'https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?w=800',
-      estimatedPrice: 75.0,
-      estimatedDurationHours: 2.5,
-      rating: 4.95,
-      isPopular: true,
+      popularityScore: 99.0,
+    },
+  });
+
+  const paragliding = await prisma.activity.create({
+    data: {
+      cityId: paris.id,
+      name: 'Paragliding over Seine Valley',
+      description: 'Tandem paragliding experience with panoramic views.',
+      category: ItineraryItemType.ACTIVITY,
+      estimatedCost: 180.0,
+      durationMinutes: 180,
+      address: 'Seine Valley Flight Center, Paris',
+      imageUrl: 'https://images.unsplash.com/photo-1512555928601-e3feed426f28?w=800',
+      popularityScore: 94.5,
     },
   });
 
   const centralPark = await prisma.activity.create({
     data: {
-      destinationId: nyc.id,
-      title: 'Central Park Bicycle & Walking Tour',
-      category: ActivityCategory.PHYSICAL_ACTIVITY,
-      description: 'Explore famous movie locations, Bethesda Terrace, and Strawberry Fields.',
+      cityId: nyc.id,
+      name: 'Central Park Bicycle Tour',
+      description: 'Guided bike tour across Bethesda Terrace & Strawberry Fields.',
+      category: ItineraryItemType.ACTIVITY,
+      estimatedCost: 45.0,
+      durationMinutes: 120,
+      address: '59th St & 5th Ave, New York, NY',
       imageUrl: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=800',
-      estimatedPrice: 45.0,
-      estimatedDurationHours: 2.0,
-      rating: 4.75,
-      isPopular: true,
+      popularityScore: 91.0,
     },
   });
 
-  const shibuyaCrossing = await prisma.activity.create({
-    data: {
-      destinationId: tokyo.id,
-      title: 'Shibuya Night Street Food Tour',
-      category: ActivityCategory.FOOD_AND_DINING,
-      description: 'Taste authentic ramen, yakitori, and matcha desserts through Shibuya backstreets.',
-      imageUrl: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?w=800',
-      estimatedPrice: 90.0,
-      estimatedDurationHours: 3.5,
-      rating: 4.9,
-      isPopular: true,
-    },
-  });
+  console.log('✅ Activities seeded');
 
-  console.log('✅ Activities seeded successfully');
-
-  // 4. Create Trips & Itineraries
+  // 5. Trips
   const parisTrip = await prisma.trip.create({
     data: {
       userId: john.id,
-      destinationId: paris.id,
-      title: 'Paris Summer Vacation',
+      name: 'Paris Summer Exploration',
+      description: '7-day getaway exploring romantic Paris landmarks and Seine Valley adventure.',
+      coverPhotoUrl: paris.imageUrl,
       startDate: new Date('2026-09-10'),
       endDate: new Date('2026-09-17'),
       status: TripStatus.UPCOMING,
+      visibility: TripVisibility.PUBLIC,
       totalBudget: 2500.0,
-      coverImage: paris.imageUrl,
-      isPublic: true,
-      notes: 'Remember to book Louvre museum passes in advance!',
-      sections: {
-        create: [
-          {
-            title: 'Arrival & City Orientation',
-            sectionOrder: 1,
-            allocatedBudget: 600.0,
-            items: {
-              create: [
-                {
-                  title: 'Check-in at Hotel Le Meurice',
-                  category: ActivityCategory.RELAXATION,
-                  dayNumber: 1,
-                  itemOrder: 1,
-                  expense: 350.0,
-                  startTime: '02:00 PM',
-                  endTime: '03:30 PM',
-                  location: '228 Rue de Rivoli, 75001 Paris',
-                },
-                {
-                  activityId: eiffelTour.id,
-                  title: 'Eiffel Tower Guided Summit Visit',
-                  category: ActivityCategory.SIGHTSEEING,
-                  dayNumber: 1,
-                  itemOrder: 2,
-                  expense: 75.0,
-                  startTime: '05:00 PM',
-                  endTime: '07:30 PM',
-                },
-              ],
-            },
-          },
-          {
-            title: 'Adventure & Outdoor Activities',
-            sectionOrder: 2,
-            allocatedBudget: 800.0,
-            items: {
-              create: [
-                {
-                  activityId: paragliding.id,
-                  title: 'Paragliding over Seine Valley',
-                  category: ActivityCategory.ADVENTURE,
-                  dayNumber: 2,
-                  itemOrder: 1,
-                  expense: 180.0,
-                  startTime: '10:00 AM',
-                  endTime: '01:00 PM',
-                },
-              ],
-            },
-          },
-        ],
+    },
+  });
+
+  // 6. Trip Stops
+  const parisStop = await prisma.tripStop.create({
+    data: {
+      tripId: parisTrip.id,
+      cityId: paris.id,
+      stopOrder: 1,
+      startDate: new Date('2026-09-10'),
+      endDate: new Date('2026-09-17'),
+      notes: 'Main city stop for hotel and activities',
+    },
+  });
+
+  // 7. Itinerary Items
+  await prisma.itineraryItem.createMany({
+    data: [
+      {
+        tripId: parisTrip.id,
+        stopId: parisStop.id,
+        activityId: eiffelTour.id,
+        itemType: ItineraryItemType.ACTIVITY,
+        title: 'Eiffel Tower Guided Summit Visit',
+        description: 'Guided summit tour',
+        startDate: new Date('2026-09-11'),
+        endDate: new Date('2026-09-11'),
+        startTime: '10:00 AM',
+        endTime: '12:30 PM',
+        costEstimate: 75.0,
+        orderIndex: 1,
       },
-    },
+      {
+        tripId: parisTrip.id,
+        stopId: parisStop.id,
+        activityId: paragliding.id,
+        itemType: ItineraryItemType.ACTIVITY,
+        title: 'Paragliding over Seine Valley',
+        description: 'Tandem flight',
+        startDate: new Date('2026-09-12'),
+        endDate: new Date('2026-09-12'),
+        startTime: '02:00 PM',
+        endTime: '05:00 PM',
+        costEstimate: 180.0,
+        orderIndex: 2,
+      },
+    ],
   });
 
-  const nycTrip = await prisma.trip.create({
+  // 8. Trip Daily Budgets
+  await prisma.tripDailyBudget.create({
     data: {
-      userId: john.id,
-      destinationId: nyc.id,
-      title: 'NYC Getaway',
-      startDate: new Date('2026-10-01'),
-      endDate: new Date('2026-10-05'),
-      status: TripStatus.UPCOMING,
-      totalBudget: 1800.0,
-      coverImage: nyc.imageUrl,
-      isPublic: true,
+      tripId: parisTrip.id,
+      budgetDate: new Date('2026-09-11'),
+      budgetAmount: 350.0,
     },
   });
 
-  const japanTrip = await prisma.trip.create({
+  // 9. Trip Shares
+  await prisma.tripShare.create({
     data: {
-      userId: jane.id,
-      destinationId: tokyo.id,
-      title: 'Japan Adventure',
-      startDate: new Date('2026-08-01'),
-      endDate: new Date('2026-08-10'),
-      status: TripStatus.COMPLETED,
-      totalBudget: 3200.0,
-      coverImage: tokyo.imageUrl,
-      isPublic: true,
+      tripId: parisTrip.id,
+      sharedByUserId: john.id,
+      mode: ShareMode.PUBLIC_LINK,
+      token: 'e7a10f92-9382-411a-8291-paris-public-link',
     },
   });
 
-  console.log('✅ Trips & Itineraries seeded successfully');
-
-  // 5. Create Community Posts
-  const post1 = await prisma.communityPost.create({
+  // 10. Community Posts
+  const post = await prisma.communityPost.create({
     data: {
       userId: john.id,
       tripId: parisTrip.id,
-      title: 'Unforgettable Tandem Paragliding in Paris!',
-      content: 'Taking off above the Seine valley was one of the most thrilling feelings of my life. Highly recommended for adventure seekers!',
-      imageUrl: paragliding.imageUrl,
-      location: 'Paris, France',
-      category: 'Adventure',
-      likesCount: 15,
-      viewsCount: 142,
-      comments: {
-        create: [
-          {
-            userId: jane.id,
-            content: 'Looks totally awesome! Adding this to my bucket list for next year.',
-          },
-        ],
-      },
+      activityId: paragliding.id,
+      cityId: paris.id,
+      title: 'Tandem Paragliding over Seine Valley - Unbelievable Experience!',
+      body: 'Taking off over the Seine valley was pure magic. Highly recommend booking in advance!',
+      imageUrls: JSON.stringify([paragliding.imageUrl]),
+      tags: JSON.stringify(['Paris', 'Adventure', 'Paragliding']),
+      status: PostStatus.PUBLISHED,
     },
   });
 
-  console.log('✅ Community posts & comments seeded successfully');
-  console.log('🎉 Seeding complete!');
+  // 11. Post Comments
+  await prisma.communityPostComment.create({
+    data: {
+      postId: post.id,
+      userId: jane.id,
+      body: 'Incredible photo! Adding this activity to my Paris wishlist right away.',
+    },
+  });
+
+  // 12. Post Likes
+  await prisma.communityPostLike.create({
+    data: {
+      postId: post.id,
+      userId: jane.id,
+    },
+  });
+
+  // 13. Search Logs
+  await prisma.searchLog.create({
+    data: {
+      userId: john.id,
+      searchType: SearchType.CITY,
+      query: 'Paris',
+      filters: JSON.stringify({ region: 'Europe' }),
+      resultCount: 1,
+    },
+  });
+
+  console.log('🎉 14-Table Seeding Complete!');
 }
 
 main()

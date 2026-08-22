@@ -23,10 +23,10 @@ export const authenticate = async (
     // Fast selective check for active user status (Mandatory Directive 1 & 5)
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
-      select: { id: true, email: true, role: true, isActive: true },
+      select: { id: true, email: true, role: true, status: true },
     });
 
-    if (!user || !user.isActive) {
+    if (!user || user.status !== 'active') {
       return sendError(res, 'User account not found or deactivated', 401);
     }
 

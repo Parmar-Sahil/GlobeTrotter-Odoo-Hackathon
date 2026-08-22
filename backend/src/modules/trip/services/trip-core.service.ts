@@ -6,13 +6,17 @@ import { TripStatus } from '../../../types/enums';
 export const createTrip = async (
   userId: string,
   data: {
-    title: string;
+    title?: string;
+    name?: string;
     destinationId?: string;
+    cityId?: string;
     startDate: string;
     endDate: string;
     totalBudget?: number;
     coverImage?: string;
+    coverPhotoUrl?: string;
     notes?: string;
+    description?: string;
   }
 ) => {
   const start = new Date(data.startDate);
@@ -22,58 +26,70 @@ export const createTrip = async (
     throw new Error('End date cannot be prior to start date');
   }
 
-  // Auto-determine status based on dates
   const now = new Date();
-  let status: TripStatus = TripStatus.UPCOMING;
+  let status: string = TripStatus.UPCOMING;
   if (now >= start && now <= end) {
     status = TripStatus.ONGOING;
   } else if (now > end) {
     status = TripStatus.COMPLETED;
   }
 
-  return await prisma.trip.create({
+  const trip = await prisma.trip.create({
     data: {
       userId,
-      title: data.title,
-      destinationId: data.destinationId || null,
+      name: data.name || data.title || 'My Trip',
+      description: data.description || data.notes || null,
       startDate: start,
       endDate: end,
       status,
       totalBudget: data.totalBudget || 0.0,
-      coverImage: data.coverImage || null,
-      notes: data.notes || null,
+      coverPhotoUrl: data.coverPhotoUrl || data.coverImage || null,
     },
     select: {
       id: true,
-      title: true,
+      name: true,
       startDate: true,
       endDate: true,
       status: true,
       totalBudget: true,
-      coverImage: true,
-      notes: true,
+      currency: true,
+      coverPhotoUrl: true,
+      description: true,
       createdAt: true,
-      destination: {
-        select: { id: true, name: true, country: true, imageUrl: true },
-      },
     },
   });
+
+  // If a destination city is passed, create a default trip stop
+  const targetCityId = data.cityId || data.destinationId;
+  if (targetCityId) {
+    await prisma.tripStop.create({
+      data: {
+        tripId: trip.id,
+        cityId: targetCityId,
+        stopOrder: 1,
+        startDate: start,
+        endDate: end,
+      },
+    });
+  }
+
+  return trip;
 };
 
 export const getUserTrips = async (userId: string, query: any) => {
   const { page, limit, skip } = parsePagination(query);
   const { status, search, sortBy = 'startDate', sortOrder = 'asc' } = query;
 
-  const whereClause: Prisma.TripWhereInput = { userId };
+  const whereClause: Prisma.TripWhereInput = { userId, deletedAt: null };
 
   if (status) {
-    whereClause.status = status as TripStatus;
+    whereClause.status = status;
   }
 
   if (search) {
     whereClause.OR = [
-      { title: { contains: search } },
-      { destination: { name: { contains: search } } },
+      { name: { contains: search } },
+      { description: { contains: search } },
     ];
   }
 
@@ -82,18 +98,27 @@ export const getUserTrips = async (userId: string, query: any) => {
       where: whereClause,
       select: {
         id: true,
-        title: true,
+        name: true,
         startDate: true,
         endDate: true,
         status: true,
+        visibility: true,
         totalBudget: true,
-        coverImage: true,
-        notes: true,
-        destination: {
-          select: { id: true, name: true, country: true, imageUrl: true },
+        currency: true,
+        coverPhotoUrl: true,
+        description: true,
+        stops: {
+          select: {
+            id: true,
+            stopOrder: true,
+            city: {
+              select: { id: true, name: true, country: true, imageUrl: true },
+            },
+          },
+          orderBy: { stopOrder: 'asc' },
         },
         _count: {
-          select: { sections: true },
+          select: { stops: true, itineraryItems: true },
         },
       },
       orderBy: { [sortBy]: sortOrder },
@@ -113,32 +138,41 @@ export const getTripById = async (tripId: string, userId?: string) => {
     select: {
       id: true,
       userId: true,
-      title: true,
+      name: true,
+      description: true,
       startDate: true,
       endDate: true,
       status: true,
+      visibility: true,
       totalBudget: true,
-      coverImage: true,
-      isPublic: true,
-      isPreplanned: true,
-      notes: true,
+      currency: true,
+      coverPhotoUrl: true,
       createdAt: true,
-      destination: {
-        select: { id: true, name: true, country: true, imageUrl: true, bannerUrl: true },
+      stops: {
+        select: {
+          id: true,
+          stopOrder: true,
+          startDate: true,
+          endDate: true,
+          notes: true,
+          city: {
+            select: { id: true, name: true, country: true, countryCode: true, imageUrl: true },
+          },
+        },
+        orderBy: { stopOrder: 'asc' },
       },
       user: {
-        select: { id: true, firstName: true, lastName: true, avatarUrl: true, username: true },
+        select: { id: true, firstName: true, lastName: true, profilePhotoUrl: true, username: true },
       },
     },
   });
 
-  if (!trip) {
+  if (!trip || trip.userId === undefined) {
     throw new Error('Trip not found');
   }
 
-  // Authorization Privacy Check (Rule 5)
-  if (!trip.isPublic && !trip.isPreplanned && trip.userId !== userId) {
-    throw new Error('Access forbidden: You do not have permission to view this trip');
+  if (trip.visibility === 'private' && trip.userId !== userId) {
+    throw new Error('Access forbidden: Private trip');
   }
 
   return trip;
@@ -159,30 +193,31 @@ export const updateTrip = async (
   }
 
   if (existingTrip.userId !== userId) {
-    throw new Error('Access forbidden: You can only update your own trips');
+    throw new Error('Access forbidden');
   }
 
   const updatePayload: Prisma.TripUpdateInput = {};
-  if (data.title) updatePayload.title = data.title;
-  if (data.destinationId) updatePayload.destination = { connect: { id: data.destinationId } };
+  if (data.name || data.title) updatePayload.name = data.name || data.title;
   if (data.startDate) updatePayload.startDate = new Date(data.startDate);
   if (data.endDate) updatePayload.endDate = new Date(data.endDate);
   if (data.status) updatePayload.status = data.status;
+  if (data.visibility) updatePayload.visibility = data.visibility;
   if (data.totalBudget !== undefined) updatePayload.totalBudget = data.totalBudget;
-  if (data.coverImage !== undefined) updatePayload.coverImage = data.coverImage || null;
-  if (data.notes !== undefined) updatePayload.notes = data.notes || null;
+  if (data.coverPhotoUrl || data.coverImage) updatePayload.coverPhotoUrl = data.coverPhotoUrl || data.coverImage;
+  if (data.description || data.notes) updatePayload.description = data.description || data.notes;
 
   return await prisma.trip.update({
     where: { id: tripId },
     data: updatePayload,
     select: {
       id: true,
-      title: true,
+      name: true,
       startDate: true,
       endDate: true,
       status: true,
+      visibility: true,
       totalBudget: true,
-      coverImage: true,
+      coverPhotoUrl: true,
       updatedAt: true,
     },
   });
@@ -194,14 +229,14 @@ export const deleteTrip = async (tripId: string, userId: string) => {
     select: { id: true, userId: true },
   });
 
-  if (!existingTrip) {
-    throw new Error('Trip not found');
+  if (!existingTrip || existingTrip.userId !== userId) {
+    throw new Error('Access forbidden or trip not found');
   }
 
-  if (existingTrip.userId !== userId) {
-    throw new Error('Access forbidden: You can only delete your own trips');
-  }
+  await prisma.trip.update({
+    where: { id: tripId },
+    data: { deletedAt: new Date() },
+  });
 
-  await prisma.trip.delete({ where: { id: tripId } });
   return { message: 'Trip deleted successfully' };
 };

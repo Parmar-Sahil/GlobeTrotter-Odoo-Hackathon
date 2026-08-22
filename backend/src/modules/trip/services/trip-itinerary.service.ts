@@ -1,13 +1,16 @@
 import { prisma } from '../../../config/prisma.config';
-import { ActivityCategory } from '../../../types/enums';
+import { ItineraryItemType } from '../../../types/enums';
 
 export const addSectionToTrip = async (
   tripId: string,
   userId: string,
   data: {
-    title: string;
+    cityId?: string;
+    destinationId?: string;
+    title?: string;
     description?: string;
     sectionOrder?: number;
+    stopOrder?: number;
     startDate?: string;
     endDate?: string;
     allocatedBudget?: number;
@@ -22,99 +25,105 @@ export const addSectionToTrip = async (
     throw new Error('Access forbidden or trip not found');
   }
 
-  // Find max sectionOrder if not provided
-  let sectionOrder = data.sectionOrder;
-  if (!sectionOrder) {
-    const lastSection = await prisma.tripSection.findFirst({
-      where: { tripId },
-      orderBy: { sectionOrder: 'desc' },
-      select: { sectionOrder: true },
-    });
-    sectionOrder = (lastSection?.sectionOrder || 0) + 1;
+  const lastStop = await prisma.tripStop.findFirst({
+    where: { tripId },
+    orderBy: { stopOrder: 'desc' },
+    select: { stopOrder: true },
+  });
+  const stopOrder = (lastStop?.stopOrder || 0) + 1;
+
+  // Get or pick a cityId if not provided
+  let cityId = data.cityId || data.destinationId;
+  if (!cityId) {
+    const firstCity = await prisma.city.findFirst({ select: { id: true } });
+    cityId = firstCity?.id || '';
   }
 
-  return await prisma.tripSection.create({
+  return await prisma.tripStop.create({
     data: {
       tripId,
-      title: data.title,
-      description: data.description || null,
-      sectionOrder,
+      cityId,
+      stopOrder,
       startDate: data.startDate ? new Date(data.startDate) : null,
       endDate: data.endDate ? new Date(data.endDate) : null,
-      allocatedBudget: data.allocatedBudget || 0.0,
+      notes: data.description || data.title || null,
     },
     select: {
       id: true,
       tripId: true,
-      title: true,
-      description: true,
-      sectionOrder: true,
+      cityId: true,
+      stopOrder: true,
       startDate: true,
       endDate: true,
-      allocatedBudget: true,
+      notes: true,
+      city: {
+        select: { id: true, name: true, country: true },
+      },
     },
   });
 };
 
 export const addItemToSection = async (
-  sectionId: string,
+  stopId: string,
   userId: string,
   data: {
     activityId?: string;
     title: string;
-    category?: ActivityCategory;
+    description?: string;
+    itemType?: string;
+    category?: string;
     dayNumber?: number;
+    orderIndex?: number;
     itemOrder?: number;
     expense?: number;
+    costEstimate?: number;
     startTime?: string;
     endTime?: string;
-    location?: string;
     notes?: string;
   }
 ) => {
-  const section = await prisma.tripSection.findUnique({
-    where: { id: sectionId },
+  const stop = await prisma.tripStop.findUnique({
+    where: { id: stopId },
     select: {
       id: true,
+      tripId: true,
       trip: {
         select: { id: true, userId: true },
       },
     },
   });
 
-  if (!section || section.trip.userId !== userId) {
-    throw new Error('Access forbidden or section not found');
+  if (!stop || stop.trip.userId !== userId) {
+    throw new Error('Access forbidden or stop not found');
   }
 
-  return await prisma.tripItem.create({
+  return await prisma.itineraryItem.create({
     data: {
-      sectionId,
+      tripId: stop.tripId,
+      stopId,
       activityId: data.activityId || null,
       title: data.title,
-      category: data.category || ActivityCategory.PHYSICAL_ACTIVITY,
-      dayNumber: data.dayNumber || 1,
-      itemOrder: data.itemOrder || 1,
-      expense: data.expense || 0.0,
+      description: data.description || data.notes || null,
+      itemType: data.itemType || data.category || ItineraryItemType.ACTIVITY,
+      costEstimate: data.costEstimate || data.expense || 0.0,
+      orderIndex: data.orderIndex || data.itemOrder || 1,
       startTime: data.startTime || null,
       endTime: data.endTime || null,
-      location: data.location || null,
-      notes: data.notes || null,
     },
     select: {
       id: true,
-      sectionId: true,
+      tripId: true,
+      stopId: true,
       activityId: true,
+      itemType: true,
       title: true,
-      category: true,
-      dayNumber: true,
-      itemOrder: true,
-      expense: true,
+      description: true,
+      costEstimate: true,
+      orderIndex: true,
       startTime: true,
       endTime: true,
-      location: true,
-      notes: true,
       activity: {
-        select: { id: true, title: true, imageUrl: true, rating: true, estimatedPrice: true },
+        select: { id: true, name: true, imageUrl: true, popularityScore: true, estimatedCost: true },
       },
     },
   });
@@ -125,42 +134,39 @@ export const getTripItinerary = async (tripId: string) => {
     where: { id: tripId },
     select: {
       id: true,
-      title: true,
+      name: true,
       startDate: true,
       endDate: true,
       totalBudget: true,
-      destination: {
-        select: { id: true, name: true, country: true, imageUrl: true },
-      },
-      sections: {
+      currency: true,
+      stops: {
         select: {
           id: true,
-          title: true,
-          description: true,
-          sectionOrder: true,
+          stopOrder: true,
           startDate: true,
           endDate: true,
-          allocatedBudget: true,
-          items: {
+          notes: true,
+          city: {
+            select: { id: true, name: true, country: true, imageUrl: true },
+          },
+          itineraryItems: {
             select: {
               id: true,
               title: true,
-              category: true,
-              dayNumber: true,
-              itemOrder: true,
-              expense: true,
+              itemType: true,
+              description: true,
+              orderIndex: true,
+              costEstimate: true,
               startTime: true,
               endTime: true,
-              location: true,
-              notes: true,
               activity: {
-                select: { id: true, title: true, imageUrl: true, rating: true },
+                select: { id: true, name: true, imageUrl: true, popularityScore: true },
               },
             },
-            orderBy: [{ dayNumber: 'asc' }, { itemOrder: 'asc' }],
+            orderBy: { orderIndex: 'asc' },
           },
         },
-        orderBy: { sectionOrder: 'asc' },
+        orderBy: { stopOrder: 'asc' },
       },
     },
   });
@@ -169,31 +175,29 @@ export const getTripItinerary = async (tripId: string) => {
     throw new Error('Trip not found');
   }
 
-  // Calculate day-wise itinerary map efficiently in-memory (Rule 2)
-  const dayWiseItinerary: Record<number, any[]> = {};
   let totalExpense = 0;
+  const dayWiseItinerary: Record<number, any[]> = {};
 
-  trip.sections.forEach((section) => {
-    section.items.forEach((item) => {
-      totalExpense += item.expense;
-      if (!dayWiseItinerary[item.dayNumber]) {
-        dayWiseItinerary[item.dayNumber] = [];
-      }
-      dayWiseItinerary[item.dayNumber].push({
+  trip.stops.forEach((stop, index) => {
+    const dayNum = index + 1;
+    if (!dayWiseItinerary[dayNum]) dayWiseItinerary[dayNum] = [];
+
+    stop.itineraryItems.forEach((item) => {
+      totalExpense += item.costEstimate || 0;
+      dayWiseItinerary[dayNum].push({
         ...item,
-        sectionTitle: section.title,
+        cityName: stop.city.name,
       });
     });
   });
 
   return {
     tripId: trip.id,
-    title: trip.title,
-    destination: trip.destination,
-    totalBudget: trip.totalBudget,
+    title: trip.name,
+    totalBudget: trip.totalBudget || 0,
     totalCalculatedExpense: totalExpense,
-    remainingBudget: trip.totalBudget - totalExpense,
-    sections: trip.sections,
+    remainingBudget: (trip.totalBudget || 0) - totalExpense,
+    stops: trip.stops,
     dayWiseItinerary,
   };
 };
@@ -203,20 +207,20 @@ export const getBudgetSummary = async (tripId: string) => {
     where: { id: tripId },
     select: {
       id: true,
-      title: true,
+      name: true,
       totalBudget: true,
-      sections: {
+      currency: true,
+      itineraryItems: {
         select: {
           id: true,
-          title: true,
-          allocatedBudget: true,
-          items: {
-            select: {
-              id: true,
-              category: true,
-              expense: true,
-            },
-          },
+          itemType: true,
+          costEstimate: true,
+        },
+      },
+      dailyBudgets: {
+        select: {
+          budgetDate: true,
+          budgetAmount: true,
         },
       },
     },
@@ -229,20 +233,22 @@ export const getBudgetSummary = async (tripId: string) => {
   const categoryBreakdown: Record<string, number> = {};
   let totalExpense = 0;
 
-  trip.sections.forEach((sec) => {
-    sec.items.forEach((item) => {
-      totalExpense += item.expense;
-      const cat = item.category || 'OTHER';
-      categoryBreakdown[cat] = (categoryBreakdown[cat] || 0) + item.expense;
-    });
+  trip.itineraryItems.forEach((item) => {
+    const cost = item.costEstimate || 0;
+    totalExpense += cost;
+    const cat = item.itemType || 'other';
+    categoryBreakdown[cat] = (categoryBreakdown[cat] || 0) + cost;
   });
+
+  const totalBudget = trip.totalBudget || 0;
 
   return {
     tripId: trip.id,
-    title: trip.title,
-    allocatedTotalBudget: trip.totalBudget,
+    title: trip.name,
+    allocatedTotalBudget: totalBudget,
     totalActualExpense: totalExpense,
-    budgetStatus: totalExpense > trip.totalBudget ? 'OVER_BUDGET' : 'WITHIN_BUDGET',
+    budgetStatus: totalExpense > totalBudget && totalBudget > 0 ? 'OVER_BUDGET' : 'WITHIN_BUDGET',
     categoryBreakdown,
+    dailyBudgets: trip.dailyBudgets,
   };
 };

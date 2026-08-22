@@ -42,7 +42,8 @@ dev.db
 backend/dev.db
 backend/prisma/dev.db
 
-# IDE and OS
+# IDE, AI, and OS
+.agents/
 .DS_Store
 Thumbs.db
 .idea/
