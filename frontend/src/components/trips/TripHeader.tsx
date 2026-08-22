@@ -38,14 +38,16 @@ export function TripHeader({ trip, onShareClick }: TripHeaderProps) {
   };
 
   const destinationCount = trip.destinationCount ?? trip.sections?.length ?? 0;
+  const tripTitle = trip.title || (trip as any).name || "My Journey";
+  const coverSrc = trip.coverImage || (trip as any).coverPhotoUrl || fallbackImage;
 
   return (
     <div className="relative rounded-3xl overflow-hidden shadow-xl shadow-orange-950/10 border border-orange-100 bg-[#2A0E06] text-white">
       {/* Cover Image Background */}
       <div className="absolute inset-0 h-full w-full">
         <img
-          src={trip.coverImage || fallbackImage}
-          alt={trip.title}
+          src={coverSrc}
+          alt={tripTitle}
           className="h-full w-full object-cover opacity-35"
           onError={(e) => {
             (e.target as HTMLImageElement).src = fallbackImage;
@@ -98,7 +100,7 @@ export function TripHeader({ trip, onShareClick }: TripHeaderProps) {
           </div>
 
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-white drop-shadow-xs">
-            {trip.title}
+            {tripTitle}
           </h1>
 
           {trip.description && (

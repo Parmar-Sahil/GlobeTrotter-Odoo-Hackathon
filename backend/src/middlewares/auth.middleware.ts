@@ -42,6 +42,30 @@ export const authenticate = async (
   }
 };
 
+export const optionalAuthenticate = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.split(' ')[1];
+      const decoded = jwt.verify(token, env.JWT_SECRET) as JwtPayload;
+      if (decoded?.userId) {
+        req.user = {
+          userId: decoded.userId,
+          email: decoded.email,
+          role: decoded.role,
+        };
+      }
+    }
+    return next();
+  } catch (error) {
+    return next();
+  }
+};
+
 export const requireRole = (...roles: Role[]) => {
   return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     if (!req.user) {

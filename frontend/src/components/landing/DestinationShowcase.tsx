@@ -3,10 +3,27 @@
 import React from "react";
 import Link from "next/link";
 import { LANDING_DESTINATIONS } from "@/lib/landingData";
+import { useTopRegionalDestinations } from "@/hooks/use-destinations";
 import { FadeIn } from "../animation/FadeIn";
-import { MapPin, Star, ArrowRight, Sparkles } from "lucide-react";
+import { MapPin, Star, ArrowRight } from "lucide-react";
 
 export function DestinationShowcase() {
+  const { data: liveDestinations } = useTopRegionalDestinations();
+
+  const displayDestinations =
+    liveDestinations && liveDestinations.length > 0
+      ? liveDestinations.map((d: any) => ({
+          id: d.id,
+          name: d.name,
+          country: d.country,
+          image: d.imageUrl || "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800",
+          costLevel: d.costIndex ? `$$ (${d.costIndex})` : "$$",
+          rating: d.popularityScore ? (d.popularityScore / 20).toFixed(1) : "4.9",
+          travelStyle: d.region || "Worldwide",
+          highlight: d.description || `Explore top highlights and attractions in ${d.name}`,
+        }))
+      : LANDING_DESTINATIONS;
+
   return (
     <section id="destinations" className="py-20 lg:py-28 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
       {/* Section Header */}
@@ -24,13 +41,13 @@ export function DestinationShowcase() {
 
       {/* Asymmetric Editorial Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-6 items-stretch">
-        {LANDING_DESTINATIONS.map((dest, idx) => {
+        {displayDestinations.map((dest: any, idx: number) => {
           const isWide = idx === 0 || idx === 3;
           const colSpan = isWide ? "lg:col-span-7" : "lg:col-span-5";
 
           return (
             <FadeIn
-              key={dest.id}
+              key={dest.id || idx}
               delay={idx * 0.08}
               distance={20}
               className={`${colSpan} flex flex-col`}

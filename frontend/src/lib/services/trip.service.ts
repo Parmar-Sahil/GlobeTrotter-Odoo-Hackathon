@@ -63,34 +63,87 @@ export const tripService = {
     page?: number;
     limit?: number;
   }): Promise<{ trips: Trip[]; meta?: any }> {
-    const res = await apiClient.get<ApiResponse<Trip[]>>("/trips/my-trips", {
+    const res = await apiClient.get<ApiResponse<any[]>>("/trips/my-trips", {
       params,
     });
+    const rawTrips = res.data.data || [];
+    const trips: Trip[] = rawTrips.map((t: any) => ({
+      ...t,
+      title: t.name || t.title || "Untitled Trip",
+      name: t.name || t.title || "Untitled Trip",
+      coverImage: t.coverPhotoUrl || t.coverImage || null,
+      coverPhotoUrl: t.coverPhotoUrl || t.coverImage || null,
+      budgetLimit: t.totalBudget || t.budgetLimit || 0,
+      totalBudget: t.totalBudget || t.budgetLimit || 0,
+      destinationCount: t._count?.stops ?? t.stops?.length ?? 0,
+    }));
     return {
-      trips: res.data.data || [],
+      trips,
       meta: (res.data as any).meta,
     };
   },
 
   async getTripById(id: string): Promise<Trip> {
-    const res = await apiClient.get<ApiResponse<Trip>>(`/trips/${id}`);
-    return res.data.data!;
+    const res = await apiClient.get<ApiResponse<any>>(`/trips/${id}`);
+    const t = res.data.data!;
+    return {
+      ...t,
+      title: t.name || t.title || "Untitled Trip",
+      name: t.name || t.title || "Untitled Trip",
+      coverImage: t.coverPhotoUrl || t.coverImage || null,
+      coverPhotoUrl: t.coverPhotoUrl || t.coverImage || null,
+      budgetLimit: t.totalBudget || t.budgetLimit || 0,
+      totalBudget: t.totalBudget || t.budgetLimit || 0,
+      destinationCount: t._count?.stops ?? t.stops?.length ?? 0,
+    };
   },
 
   async createTrip(data: CreateTripDto): Promise<Trip> {
     const payload: any = {
-      ...data,
-      totalBudget: data.totalBudget || data.budgetLimit,
-      budgetLimit: data.budgetLimit || data.totalBudget,
+      title: data.title,
+      name: data.title,
+      startDate: data.startDate,
+      endDate: data.endDate,
+      totalBudget: data.totalBudget || data.budgetLimit || 0,
+      budgetLimit: data.budgetLimit || data.totalBudget || 0,
+      coverImage: data.coverImage,
+      coverPhotoUrl: data.coverImage,
+      notes: data.description,
+      description: data.description,
+      destinationId: data.destinationId || data.cityId,
       cityId: data.cityId || data.destinationId,
     };
-    const res = await apiClient.post<ApiResponse<Trip>>("/trips", payload);
-    return res.data.data!;
+    const res = await apiClient.post<ApiResponse<any>>("/trips", payload);
+    const t = res.data.data!;
+    return {
+      ...t,
+      title: t.name || t.title || data.title,
+      name: t.name || t.title || data.title,
+      coverImage: t.coverPhotoUrl || t.coverImage || data.coverImage || null,
+      coverPhotoUrl: t.coverPhotoUrl || t.coverImage || data.coverImage || null,
+      budgetLimit: t.totalBudget || t.budgetLimit || data.budgetLimit || 0,
+      totalBudget: t.totalBudget || t.budgetLimit || data.budgetLimit || 0,
+    };
   },
 
   async updateTrip(id: string, data: UpdateTripDto): Promise<Trip> {
-    const res = await apiClient.put<ApiResponse<Trip>>(`/trips/${id}`, data);
-    return res.data.data!;
+    const payload: any = {
+      ...data,
+      name: data.title,
+      coverPhotoUrl: data.coverImage,
+      totalBudget: data.totalBudget || data.budgetLimit,
+    };
+    const res = await apiClient.put<ApiResponse<any>>(`/trips/${id}`, payload);
+    const t = res.data.data!;
+    return {
+      ...t,
+      title: t.name || t.title || "Untitled Trip",
+      name: t.name || t.title || "Untitled Trip",
+      coverImage: t.coverPhotoUrl || t.coverImage || null,
+      coverPhotoUrl: t.coverPhotoUrl || t.coverImage || null,
+      budgetLimit: t.totalBudget || t.budgetLimit || 0,
+      totalBudget: t.totalBudget || t.budgetLimit || 0,
+    };
   },
 
   async deleteTrip(id: string): Promise<void> {

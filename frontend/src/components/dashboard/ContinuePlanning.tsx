@@ -33,14 +33,17 @@ export function ContinuePlanning({ trip }: ContinuePlanningProps) {
   const fallbackImage =
     "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=1000&auto=format&fit=crop&q=80";
 
+  const tripTitle = trip.title || (trip as any).name || "My Journey";
+  const coverSrc = trip.coverImage || (trip as any).coverPhotoUrl || fallbackImage;
+
   return (
     <div className="relative rounded-3xl overflow-hidden border border-orange-100 bg-white shadow-md shadow-orange-950/5 hover:shadow-xl transition-all duration-300">
       <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch">
         {/* Visual Media banner */}
         <div className="lg:col-span-5 relative min-h-[200px] lg:min-h-full overflow-hidden bg-slate-950">
           <img
-            src={trip.coverImage || fallbackImage}
-            alt={trip.title}
+            src={coverSrc}
+            alt={tripTitle}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
           <div className="absolute inset-0 bg-gradient-to-t lg:bg-gradient-to-r from-black/70 via-black/30 to-transparent" />
@@ -54,7 +57,7 @@ export function ContinuePlanning({ trip }: ContinuePlanningProps) {
 
           <div className="absolute bottom-4 left-4 right-4 text-white">
             <p className="text-xs text-orange-200 font-medium">Draft Itinerary</p>
-            <h4 className="text-lg font-extrabold truncate">{trip.title}</h4>
+            <h4 className="text-lg font-extrabold truncate">{tripTitle}</h4>
           </div>
         </div>
 
@@ -76,7 +79,7 @@ export function ContinuePlanning({ trip }: ContinuePlanningProps) {
 
             <div className="space-y-1.5">
               <h3 className="text-2xl font-extrabold text-slate-900 leading-tight">
-                {trip.title}
+                {tripTitle}
               </h3>
               <div className="inline-flex items-center gap-2 text-xs font-bold text-slate-600">
                 <MapPin className="w-3.5 h-3.5 text-[#F95724]" />

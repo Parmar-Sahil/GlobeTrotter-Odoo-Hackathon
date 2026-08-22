@@ -21,10 +21,13 @@ export default function TripsPage() {
 
   const filteredTrips = useMemo(() => {
     return trips.filter((trip) => {
+      const tripTitle = trip.title || (trip as any).name || "";
+      const tripDesc = trip.description || (trip as any).notes || "";
+      const query = searchQuery.toLowerCase();
+
       const matchesSearch =
-        trip.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (trip.description &&
-          trip.description.toLowerCase().includes(searchQuery.toLowerCase()));
+        tripTitle.toLowerCase().includes(query) ||
+        tripDesc.toLowerCase().includes(query);
 
       const matchesStatus =
         statusFilter === "ALL" || trip.status === statusFilter;
